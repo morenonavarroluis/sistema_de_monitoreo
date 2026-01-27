@@ -39,7 +39,7 @@ def run_ping_check(historial_referencia):
                 categorias[cat_nombre] = []
             categorias[cat_nombre].append(res_data)
 
-        # Construir el cuerpo del mensaje tal cual lo pediste
+        # Construir el cuerpo del mensaje 
         reporte_texto = f"📊 <b>REPORTE DE INFRAESTRUCTURA</b>\n"
         reporte_texto += f"📅 {datetime.now().strftime('%d/%m/%Y')} | ⏰ {datetime.now().strftime('%I:%M %p')}\n"
         reporte_texto += "--------------------------------\n\n"

@@ -19,5 +19,20 @@ class ConfigPing(Base):
     name = Column(String(200), nullable=True)
     categoria = Column(String(100), nullable=False)
 
+class Categoria(Base):
+    __tablename__ = "categoria"
+
+    id_categoria = Column(Integer, primary_key=True, index=True)
+    nombre_categoria = Column(String(100), nullable=False)
+
 # 3. Forma correcta de crear las tablas
+
+class Usuario(Base):
+    __tablename__ = "usuarios"
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String(100))
+    email = Column(String(100), unique=True, index=True)
+    password = Column(String(100), index=True)
+
+
 Base.metadata.create_all(bind=engine)
