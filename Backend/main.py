@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from controller.ping import run_ping_check
 from apscheduler.schedulers.background import BackgroundScheduler
 from controller.registrar_user import ver_usuarios
+from controller.login import login_usuario
 
 app = FastAPI()
 
@@ -16,6 +17,9 @@ class UserSchema(BaseModel):
     email: str
     password: str
 
+class UserLogin(BaseModel):
+    email: str
+    password: str
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,7 +35,12 @@ def startup_event():
     scheduler.start()
     
     
-    #run_ping_check(historial_real) 
+    run_ping_check(historial_real) 
+
+@app.post("/login")
+async def usuario_login(datos: UserLogin):
+    resultado = login_usuario(datos.email, datos.password)
+    return resultado
 
 @app.get("/status")
 async def get_latest_pings():

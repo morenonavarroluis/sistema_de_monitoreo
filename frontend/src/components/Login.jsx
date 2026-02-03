@@ -1,18 +1,37 @@
 import { useState } from 'react';
-
+import { useNavigate } from 'react-router-dom';
 function Login() {
-  // 1. Definimos los estados para capturar los datos
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Para feedback visual
+  const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  // 2. Función para manejar el envío
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Evita que la página se recargue
-    
-    // Aquí es donde conectarías con tu API
-    console.log('Enviando datos...', { email, password });
-    
-    alert(`Intento de login con: ${email}`);
+    try {
+      const response = await fetch('http://localhost:8000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // 3. GUARDAR EL TOKEN (Importante para que no te eche al recargar)
+        localStorage.setItem('token', data.token); 
+
+        // 4. REDIRECCIONAR AL DASHBOARD
+        navigate('/dashboard'); 
+      } else {
+        alert('Datos incorrectos');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }finally {
+      setIsLoading(false); // <--- Esto asegura que el botón se reactive siempre
+    }
   };
 
   return (
@@ -47,11 +66,9 @@ function Login() {
             <button 
               type="submit" 
               className="transition duration-200 bg-blue-500 hover:bg-blue-600 focus:bg-blue-700 focus:shadow-sm focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 text-white w-full py-2.5 rounded-lg text-sm shadow-sm hover:shadow-md font-semibold text-center inline-block"
-            >
-              <span className="inline-block mr-2">Iniciar Sesión</span>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4 inline-block">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+            disabled={isLoading}>
+              
+              {isLoading ? 'Cargando...' : 'Iniciar Sesión'}
             </button>
           </form>
           

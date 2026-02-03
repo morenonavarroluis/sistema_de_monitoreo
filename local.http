@@ -1,9 +1,30 @@
+### Login usuario
+POST http://127.0.0.1:8000/login
+Content-Type: application/json
+
+{
+    
+    "email": "moreno@gmail.com",
+    "password": "123456"
+}
+
+### Crear usuario
 POST http://127.0.0.1:8000/user
 Content-Type: application/json
 
 {
-    "nombre": "manuel navarro",
-    "email": "moreno@gmail.com",
-    "password": "987456"
+    "nombre": "manuel",
+    "email": "test@test.com",
+    "password": "123456"
 }
+
+### Ver usuarios
+GET  http://127.0.0.1:8000/view_user
+Content-Type: application/json
+
+
+### Status 
+GET http://127.0.0.1:8000/status
+Content-Type: application/json
+
 
