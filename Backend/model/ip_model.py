@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker,relationship
 
 # 1. URL corregida: usuario:password@host:puerto/nombre_base_de_datos
 # Asegúrate de que 'config_ping' sea el nombre de tu DB en phpMyAdmin
-SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://root:123456@localhost:3306/config_ping"
+SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://lnavarro:123456@localhost:3306/config_ping"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

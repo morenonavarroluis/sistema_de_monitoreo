@@ -6,6 +6,7 @@ from controller.ping import run_ping_check
 from apscheduler.schedulers.background import BackgroundScheduler
 from controller.registrar_user import ver_usuarios
 from controller.login import login_usuario
+from controller.port_clear import test_ssh_connection
 
 app = FastAPI()
 
@@ -57,3 +58,16 @@ async def usuario_registro(datos: UserSchema):
 async def get_usuarios(): 
     view_user = ver_usuarios() 
     return view_user
+
+
+@app.get("/limpiar_ports")
+async def port_clear(): 
+    ips = ['10.20.100.12', '10.30.2.8', '10.20.100.54', '10.20.100.52']
+    USER = "M3rc@l"
+    PASS = "R3DM3RC@L22"
+    
+    resultados=[]
+    for ip in ips:
+       clear = test_ssh_connection(ip, USER, PASS)
+       resultados.append({"ip": ip, "status": "OK" if clear else "Error"}) 
+    return {"message": "Proceso de limpieza terminado", "detalles": resultados}

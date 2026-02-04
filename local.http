@@ -27,4 +27,7 @@ Content-Type: application/json
 GET http://127.0.0.1:8000/status
 Content-Type: application/json
 
+### Limpiar Puertos de los Switches
+GET http://127.0.0.1:8000/limpiar_ports
+Accept: application/json
 
