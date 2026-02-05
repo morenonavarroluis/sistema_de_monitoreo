@@ -28,7 +28,7 @@ CREATE TABLE `categoria` (
   `nombre_categoria` varchar(100) NOT NULL,
   PRIMARY KEY (`id_categoria`),
   KEY `ix_categoria_id_categoria` (`id_categoria`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -37,6 +37,7 @@ CREATE TABLE `categoria` (
 
 LOCK TABLES `categoria` WRITE;
 /*!40000 ALTER TABLE `categoria` DISABLE KEYS */;
+INSERT INTO `categoria` VALUES (1,'DNS PRINCIPAL'),(2,'PROXY'),(3,' SERVICIO WEB'),(4,'SERVICIO SIGA'),(5,'SERVIDORES HATILLO'),(6,'SERVIDORES SOCARRAS'),(7,'ENLACE PRINCIPAL SEDE'),(8,'SERVIDORES MINPPAL');
 /*!40000 ALTER TABLE `categoria` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -79,10 +80,12 @@ DROP TABLE IF EXISTS `ip`;
 CREATE TABLE `ip` (
   `id_ip` int(11) NOT NULL AUTO_INCREMENT,
   `ip` varchar(200) NOT NULL,
-  `name` varchar(200) NOT NULL,
-  `id_categoria` varchar(100) NOT NULL DEFAULT 'OTROS',
+  `name` varchar(200) DEFAULT NULL,
+  `id_categoria` int(11) NOT NULL,
   PRIMARY KEY (`id_ip`),
-  KEY `id_categoria` (`id_categoria`)
+  KEY `id_categoria` (`id_categoria`),
+  KEY `ix_ip_id_ip` (`id_ip`),
+  CONSTRAINT `ip_ibfk_1` FOREIGN KEY (`id_categoria`) REFERENCES `categoria` (`id_categoria`)
 ) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -92,7 +95,7 @@ CREATE TABLE `ip` (
 
 LOCK TABLES `ip` WRITE;
 /*!40000 ALTER TABLE `ip` DISABLE KEYS */;
-INSERT INTO `ip` VALUES (1,'10.20.0.42','DNS PRINCIPAL','1'),(2,'10.20.0.37','DNS Estados','1'),(3,'10.20.0.38','Proxy Master','2'),(4,'10.20.0.41','Proxy Slave ','2'),(5,'10.20.0.48','OpenVPN','2'),(6,'192.168.0.21','Servidor RT','3'),(7,'192.168.0.15','NEW Servidor WEB','3'),(8,'192.168.0.5',' Intramercal ','3'),(9,'10.24.26.68',' Mersalud','3'),(10,'10.22.8.57',' Mercloud','3'),(11,'10.20.13.10',' Siga Reporte','4'),(12,'10.20.1.161',' Siga Admi (socarras) ','4'),(13,'10.24.26.124',' Siga WEB (MINPAL)','4'),(14,'10.24.26.103',' Servidor Hatillo1','5'),(15,'10.24.26.104',' Servidor Hatillo2','5'),(16,'10.24.26.105',' Servidor Hatillo3','5'),(17,'10.20.0.105',' Servidor Socarras1','6'),(18,'10.20.0.107',' Servidor Socarras2','6'),(19,'10.20.0.108',' Servidor Socarras3','6'),(20,'10.20.0.109','Servidor Socarras4 ','6'),(21,'10.24.194.1','L2L Principal Socarras ','7'),(22,'10.20.35.4',' LAN Socarras','7'),(23,'10.20.8.12','Tacacs','7'),(24,'10.24.194.132','L2L Centro Plaza','7'),(25,'10.24.31.4','LAN Centro Plaza','7'),(26,'10.24.194.131',' L2L Fundaciones','7'),(27,'10.22.2.5','LAN Fundaciones','7'),(28,'10.22.2.1','Sw CD Fundaciones','7'),(29,'10.24.225.1','Metro Hatillo','7'),(30,'10.24.28.4','LAN Metro Hatillo','7'),(31,'190.202.85.33','Internet Metro','7'),(32,'186.24.13.1','L2L Internet Movistar','7'),(33,'10.20.4.10','FortiGate','7'),(34,'10.24.26.210','ASA Hatillo','7'),(35,'10.22.8.104','SERVIDORES MINPPAL','8'),(36,'10.22.8.105','SERVIDORES MINPPAL','8'),(37,'10.22.8.106','SERVIDORES MINPPAL','8'),(38,'10.22.8.107','SERVIDORES MINPPAL','8'),(39,'10.22.8.108','SERVIDORES MINPPAL','8'),(40,'10.22.8.109','SERVIDORES MINPPAL','8'),(41,'10.22.8.114','SERVIDORES MINPPAL','8');
+INSERT INTO `ip` VALUES (1,'10.20.0.42','DNS PRINCIPAL',1),(2,'10.20.0.37','DNS Estados',1),(3,'10.20.0.38','Proxy Master',2),(4,'10.20.0.41','Proxy Slave ',2),(5,'10.20.0.48','OpenVPN',2),(6,'192.168.0.21','Servidor RT',3),(7,'192.168.0.15','NEW Servidor WEB',3),(8,'192.168.0.5',' Intramercal ',3),(9,'10.24.26.68',' Mersalud',3),(10,'10.22.8.57',' Mercloud',3),(11,'10.20.13.10',' Siga Reporte',4),(12,'10.20.1.161',' Siga Admi (socarras) ',4),(13,'10.24.26.124',' Siga WEB (MINPAL)',4),(14,'10.24.26.103',' Servidor Hatillo1',5),(15,'10.24.26.104',' Servidor Hatillo2',5),(16,'10.24.26.105',' Servidor Hatillo3',5),(17,'10.20.0.105',' Servidor Socarras1',6),(18,'10.20.0.107',' Servidor Socarras2',6),(19,'10.20.0.108',' Servidor Socarras3',6),(20,'10.20.0.109','Servidor Socarras4 ',6),(21,'10.24.194.1','L2L Principal Socarras ',7),(22,'10.20.35.4',' LAN Socarras',7),(23,'10.20.8.12','Tacacs',7),(24,'10.24.194.132','L2L Centro Plaza',7),(25,'10.24.31.4','LAN Centro Plaza',7),(26,'10.24.194.131',' L2L Fundaciones',7),(27,'10.22.2.5','LAN Fundaciones',7),(28,'10.22.2.1','Sw CD Fundaciones',7),(29,'10.24.225.1','Metro Hatillo',7),(30,'10.24.28.4','LAN Metro Hatillo',7),(31,'190.202.85.33','Internet Metro',7),(32,'186.24.13.1','L2L Internet Movistar',7),(33,'10.20.4.10','FortiGate',7),(34,'10.24.26.210','ASA Hatillo',7),(35,'10.22.8.104','SERVIDORES MINPPAL',8),(36,'10.22.8.105','SERVIDORES MINPPAL',8),(37,'10.22.8.106','SERVIDORES MINPPAL',8),(38,'10.22.8.107','SERVIDORES MINPPAL',8),(39,'10.22.8.108','SERVIDORES MINPPAL',8),(40,'10.22.8.109','SERVIDORES MINPPAL',8),(41,'10.22.8.114','SERVIDORES MINPPAL',8);
 /*!40000 ALTER TABLE `ip` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -110,8 +113,8 @@ CREATE TABLE `usuarios` (
   `password` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ix_usuarios_email` (`email`),
-  KEY `ix_usuarios_id` (`id`),
-  KEY `ix_usuarios_password` (`password`)
+  KEY `ix_usuarios_password` (`password`),
+  KEY `ix_usuarios_id` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -134,4 +137,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-05 14:38:33
+-- Dump completed on 2026-02-05 16:11:19
