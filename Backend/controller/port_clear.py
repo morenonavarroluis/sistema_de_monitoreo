@@ -1,6 +1,7 @@
 import paramiko
 import time
 import re
+from model.ip_model import Clearport, SessionLocal
 
 ips =['10.20.100.12','10.30.2.8','10.20.100.54','10.20.100.52']
 
@@ -75,7 +76,28 @@ def test_ssh_connection(hostname, username, password):
     finally:
         if client:
             client.close()
-
+def register_port_clear(ip, nombre, user_ip, pass_ip, description=""):
+    db = SessionLocal()
+    try:
+        nuevo_registro = Clearport(
+            ip_port=ip,
+            nombre=nombre,
+            user_ip=user_ip,
+            pass_ip=pass_ip,
+            description=description
+        )
+        db.add(nuevo_registro)
+        db.commit()
+        db.refresh(nuevo_registro) # Opcional: para tener el ID generado
+        print(f"Registro de limpieza de puerto guardado para {ip}")
+        return nuevo_registro
+    except Exception as e:
+        db.rollback() # Si hay error, deshace los cambios
+        print(f"Error al registrar: {e}")
+        raise e
+    finally:
+        db.close()
+    
 if __name__ == "__main__":
    for ip in HOST:
         print(f"\n--- Iniciando proceso en: {ip} ---")

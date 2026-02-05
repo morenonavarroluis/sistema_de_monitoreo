@@ -31,3 +31,19 @@ Content-Type: application/json
 GET http://127.0.0.1:8000/limpiar_ports
 Accept: application/json
 
+### Limpiar Puertos de los Switches y Guardar en DB
+POST http://127.0.0.1:8000/registrar_ports_db
+Content-Type: application/json
+
+{
+    "ip": "192.168.1.15",
+    "nombre": "Puerto_Switch_01",
+    "user_ip": "admin",
+    "pass_ip": "secreto123",
+    "description": "Limpieza de mantenimiento mensual"
+}
+
+### Ver Puertos Limpiados en DB
+GET http://127.0.0.1:8000/view_clearports
+Content-Type: application/json
+

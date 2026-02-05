@@ -17,6 +17,9 @@ function Monitoreo() {
 
         
         <main className="p-8">
+          <div>
+            <h1 className="text-2xl font-bold mb-4">Monitoreo de Dispositivos</h1>
+          </div>
           <div className="grid ">
             <Table/>
           </div>

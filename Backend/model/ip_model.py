@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker,relationship
 
 # 1. URL corregida: usuario:password@host:puerto/nombre_base_de_datos
 # Asegúrate de que 'config_ping' sea el nombre de tu DB en phpMyAdmin
-SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://lnavarro:123456@localhost:3306/config_ping"
+SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://root:123456@localhost:3306/config_ping"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -44,5 +44,14 @@ class Usuario(Base):
     email = Column(String(100), unique=True, index=True)
     password = Column(String(100), index=True)
 
+
+class Clearport(Base):
+    __tablename__ = "clearport"
+    id = Column(Integer, primary_key=True, index=True)
+    ip_port = Column(String(100), nullable=False)
+    nombre = Column(String(100), nullable=False)
+    user_ip = Column(String(100), nullable=False)
+    pass_ip = Column(String(100), nullable=False)
+    description = Column(String(200), nullable=True)
 
 Base.metadata.create_all(bind=engine)

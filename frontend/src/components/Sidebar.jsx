@@ -14,6 +14,7 @@ function Sidebar() {
     { name: 'Monitoreo', icon: <Activity size={20} />, path: '/monitoreo' },
     { name: 'Perfil', icon: <User size={20} />, path: '/perfil' },
     { name: 'Configuración', icon: <Settings size={20} />, path: '/config' },
+    { name: 'clear_port', icon: <Settings size={20} />, path: '/clear_port' },
   ];
 
   return (
