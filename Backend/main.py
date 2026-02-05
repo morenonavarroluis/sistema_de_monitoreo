@@ -7,9 +7,9 @@ from controller.ping import run_ping_check
 from apscheduler.schedulers.background import BackgroundScheduler
 from controller.registrar_user import ver_usuarios
 from controller.login import login_usuario
-from controller.port_clear import test_ssh_connection, register_port_clear
+from controller.port_clear import test_ssh_connection, register_port_clear,log_message
 from model.ip_model import Clearport, SessionLocal
-
+from fastapi import HTTPException
 app = FastAPI()
 
 # Esta es la única lista de verdad
@@ -41,11 +41,11 @@ app.add_middleware(
 @app.on_event("startup")
 def startup_event():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(run_ping_check, 'cron', hour='8,16', args=[historial_real])
+    scheduler.add_job(run_ping_check, 'cron', hour='08,15,16', args=[historial_real])
     scheduler.start()
     
     
-    # run_ping_check(historial_real) 
+    run_ping_check(historial_real) 
 
 @app.post("/login")
 async def usuario_login(datos: UserLogin):
@@ -69,33 +69,94 @@ async def get_usuarios():
     return view_user
 
 
-from fastapi import HTTPException
 
-@app.post("/limpiar_ports") # 1. Cambiamos a POST
-async def port_clear(): 
-    ips = ['10.20.100.12', '10.30.2.8', '10.20.100.54', '10.20.100.52']
-    USER = "M3rc@l"
-    PASS = "R3DM3RC@L22"
+
+@app.post("/limpiar_ports")
+async def port_clear():
+    # 1. Abrir conexión a la DB
+    db = SessionLocal()
+    try:
+        # 2. Consultar todos los dispositivos registrados
+        dispositivos = db.query(Clearport).all()
+        
+        if not dispositivos:
+            raise HTTPException(status_code=404, detail="No hay IPs registradas en la base de datos")
+
+        resultados = []
+        fallos = 0
+
+        # 3. Iterar usando los datos de la DB
+        for equipo in dispositivos:
+            # Usamos los campos específicos de cada fila: ip_port, user_ip, pass_ip
+            exito = test_ssh_connection(equipo.ip_port, equipo.user_ip, equipo.pass_ip)
+            
+            status = "OK" if exito else "Error"
+            if not exito:
+                fallos += 1
+            
+            resultados.append({
+                "nombre": equipo.nombre,
+                "ip": equipo.ip_port, 
+                "status": status
+            })
+
+        # 4. Manejo de errores si todo falla
+        if fallos == len(dispositivos):
+            raise HTTPException(status_code=500, detail="No se pudo conectar a ningún dispositivo")
+
+        return {
+            "message": f"Proceso terminado. Éxitos: {len(dispositivos)-fallos}, Fallos: {fallos}",
+            "detalles": resultados
+        }
     
-    resultados = []
-    fallos = 0
+    except Exception as e:
+        # Capturar errores inesperados de DB o ejecución
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+    
+    finally:
+        # 5. Siempre cerrar la sesión de la DB
+        db.close()
 
-    for ip in ips:
-        clear = test_ssh_connection(ip, USER, PASS)
-        status = "OK" if clear else "Error"
-        if not clear:
-            fallos += 1
-        resultados.append({"ip": ip, "status": status}) 
+@app.post("/limpiar_ports/{ip}")
+async def port_clear_individual(ip: str): 
+    db = SessionLocal()
+    try:
+        # 1. Buscamos específicamente el equipo que coincida con esa IP
+        equipo = db.query(Clearport).filter(Clearport.ip_port == ip).first()
+        
+        # 2. Si no existe en la DB, lanzamos error 404
+        if not equipo:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"La IP {ip} no está registrada en la base de datos"
+            )
 
-    # 2. Si fallaron todas, podemos mandar un error real de servidor (500)
-    if fallos == len(ips):
-        raise HTTPException(status_code=500, detail="No se pudo conectar a ninguna IP")
+        # 3. Ejecutamos la conexión usando los datos de ese registro
+        exito = test_ssh_connection(
+            hostname=equipo.ip_port, 
+            username=equipo.user_ip, 
+            password=equipo.pass_ip
+        )
+        
+        if not exito:
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Error de conexión SSH con el equipo {equipo.nombre} ({ip})"
+            )
 
-    return {
-        "message": f"Proceso terminado. Exitos: {len(ips)-fallos}, Fallos: {fallos}",
-        "detalles": resultados
-    }
+        return {
+            "status": "success",
+            "message": f"Limpieza completada en {equipo.nombre}",
+            "datos": {
+                "nombre": equipo.nombre,
+                "ip": equipo.ip_port,
+                "descripcion": equipo.description
+            }
+        }
 
+    finally:
+        db.close()
+          
 def get_db():
     db = SessionLocal()
     try:

@@ -4,12 +4,43 @@ import Header from '../components/Header';
 import Table from '../components/Table'; 
 import api from '../services/api';   
 import { usePorts } from '../hooks/usePorts';
+import { useIpsUser } from '../hooks/ipsUser'; 
 import Modal from '../components/Modal';
 
 function ClearPort() {
-  const { data, clearPorts, loading } = usePorts();
+  const { data, clearPorts, clearPortIndividual, loading } = usePorts();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+  const { data: ipsRegistradas, registrarNuevaIp } = useIpsUser();
+
+  // 1. Definimos el estado inicial del formulario
+  const [formData, setFormData] = useState({
+    ip: '',
+    nombre: '',
+    user_ip: '',
+    pass_ip: '',
+    description: ''
+  });
+
+  // 2. Función para actualizar el estado cuando el usuario escribe
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    
+  };
+
+  // 3. Función que maneja el envío del formulario
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // PASAMOS LOS DATOS AQUÍ
+    const success = await registrarNuevaIp(formData);
+    
+    if (success) {
+      setIsModalOpen(false);
+      setFormData({ ip: '', nombre: '', user_ip: '', pass_ip: '', description: '' });
+    }
+  };
+
   return (
      <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
@@ -17,66 +48,116 @@ function ClearPort() {
         <Header />
         <main className="p-8">
           <div className='mb-4'>
-            {/* Vinculamos la función al botón */}
-            
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={clearPorts} disabled={loading}>
+            <button 
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" 
+              onClick={clearPorts} 
+              disabled={loading}
+            >
               {loading ? 'Procesando...' : 'Limpiar Todos los Puertos'}
             </button>
 
-            <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2" onClick={() => setIsModalOpen(true)}>
+            <button 
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2" 
+              onClick={() => setIsModalOpen(true)}
+            >
               Registrar Ip
             </button>
           </div>
           <div className="grid ">
-            {/* Pasamos los datos del GET a la tabla */}
-            <Table data={data} />
+            <Table data={data} clearPortIndividual={clearPortIndividual} />
           </div>
         </main>
       </div>
        
-       {/* --- ESTA ES LA PARTE QUE TE FALTABA --- */}
-      <Modal 
+     <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         title="Registrar Nueva IP"
       >
-        <form className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Dirección IP</label>
-            <input type="text" className="mt-1 block w-full border rounded-md p-2" placeholder="192.168.1.1" />
-          </div>
-           <div>
-            <label className="block text-sm font-medium text-gray-700">Nombre switch</label>
-            <input type="text" className="mt-1 block w-full border rounded-md p-2" placeholder="Switch 1" />
-          </div>
-           <div>
-            <label className="block text-sm font-medium text-gray-700">usuario switch</label>
-            <input type="text" className="mt-1 block w-full border rounded-md p-2" placeholder="Lperez" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">contraseña switch</label>
-            <input type="password" className="mt-1 block w-full border rounded-md p-2" placeholder="Contraseña del switch" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Marca del switch</label>
-            <input type="text" className="mt-1 block w-full border rounded-md p-2" placeholder="Marca del switch" />
+            <input 
+              name="ip"
+              value={formData.ip}
+              onChange={handleChange}
+              type="text" 
+              className="mt-1 block w-full border rounded-md p-2" 
+              placeholder="192.168.1.1" 
+              required
+            />
           </div>
 
-          <button 
-            type="button"
-            className="w-full bg-green-500 text-white py-2 rounded font-bold"
-            onClick={() => {
-                alert("IP Registrada (Simulación)");
-                setIsModalOpen(false);
-            }}
-          >
-            Guardar IP
-          </button>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Nombre Switch</label>
+            <input 
+              name="nombre"
+              value={formData.nombreSwitch}
+              onChange={handleChange}
+              type="text" 
+              className="mt-1 block w-full border rounded-md p-2" 
+              placeholder="Switch Principal" 
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Usuario</label>
+            <input 
+              name="user_ip"
+              value={formData.usuario}
+              onChange={handleChange}
+              type="text" 
+              className="mt-1 block w-full border rounded-md p-2" 
+              placeholder="admin" 
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Contraseña switch</label>
+            <input 
+              name="pass_ip"
+              value={formData.password}
+              onChange={handleChange}
+              type="password" 
+              className="mt-1 block w-full border rounded-md p-2" 
+              placeholder="********" 
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Marca</label>
+            <input 
+              name="description"
+              value={formData.marca}
+              onChange={handleChange}
+              type="text" 
+              className="mt-1 block w-full border rounded-md p-2" 
+              placeholder="Cisco, HP, etc." 
+              required
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <button 
+              type="submit"
+              className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded font-bold transition-colors"
+            >
+              Guardar IP
+            </button>
+            
+            <button 
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="w-full bg-gray-200 text-gray-700 py-2 rounded font-bold"
+            >
+              Cancelar
+            </button>
+          </div>
         </form>
       </Modal>
-      {/* --------------------------------------- */}
-      
-
     </div>
   );
 }

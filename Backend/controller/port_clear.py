@@ -3,11 +3,19 @@ import time
 import re
 from model.ip_model import Clearport, SessionLocal
 
-ips =['10.20.100.12','10.30.2.8','10.20.100.54','10.20.100.52']
 
-HOST = ips 
-USER = "M3rc@l"
-PASS = "R3DM3RC@L22"
+db = SessionLocal()
+
+def get_all_clearports():
+    db = SessionLocal()
+    try:
+        clearports = db.query(Clearport).all()
+        return clearports
+    except Exception as e:
+        print(f"Error al obtener registros: {e}")
+        raise e
+    finally:        
+        db.close()
 
 def log_message(hostname, msg, **kwargs):
     """Versión que acepta argumentos extra sin fallar"""
@@ -99,11 +107,23 @@ def register_port_clear(ip, nombre, user_ip, pass_ip, description=""):
         db.close()
     
 if __name__ == "__main__":
-   for ip in HOST:
-        print(f"\n--- Iniciando proceso en: {ip} ---")
-        exito = test_ssh_connection(ip, USER, PASS)
+   
+    dispositivos = get_all_clearports()
+    
+    if not dispositivos:
+        print("No se encontraron dispositivos en la base de datos.")
+    
+    for dispositivo in dispositivos:
+        # Usamos los atributos del modelo: ip_port, user_ip y pass_ip
+        print(f"\n--- Iniciando proceso en: {dispositivo.nombre} ({dispositivo.ip_port}) ---")
+        
+        exito = test_ssh_connection(
+            hostname=dispositivo.ip_port, 
+            username=dispositivo.user_ip, 
+            password=dispositivo.pass_ip
+        )
         
         if exito:
-            log_message(ip, "Proceso completado con éxito.")
+            log_message(dispositivo.ip_port, "Proceso completado con éxito.")
         else:
-            log_message(ip, "El proceso falló o fue incompleto.")
+            log_message(dispositivo.ip_port, "El proceso falló.")
