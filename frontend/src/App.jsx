@@ -3,6 +3,7 @@ import Login from './components/Login';
 import Dashboard from './pages/Dashboard';
 import Monitoreo from './pages/Monitoreo';
 import ClearPort from './pages/Clearport';
+import Reportes from './pages/Reportes';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/monitoreo" element={<Monitoreo />} />
         <Route path="/clear_port" element={<ClearPort />} />
+        <Route path="/Reportes" element={<Reportes />} />
       
       </Routes>
     </Router>

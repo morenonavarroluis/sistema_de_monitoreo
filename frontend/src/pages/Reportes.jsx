@@ -9,7 +9,7 @@ import Modal from '../components/Modal';
 import { usePortScanner } from '../hooks/usePortScanner'; 
 import { ProgressBar } from '../components/ProgressBar';
 
-function ClearPort() {
+function Reportes() {
   const { data, clearPorts, clearPortIndividual } = usePorts();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: ipsRegistradas, registrarNuevaIp } = useIpsUser();
@@ -144,4 +144,4 @@ function ClearPort() {
   );
 }
 
-export default ClearPort;
+export default Reportes;

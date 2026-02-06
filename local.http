@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
     
-    "email": "moreno@gmail.com",
+    "email": "test@test.com",
     "password": "123456"
 }
 
@@ -13,8 +13,8 @@ POST http://127.0.0.1:8000/user
 Content-Type: application/json
 
 {
-    "nombre": "manuel",
-    "email": "test@test.com",
+    "nombre": "luis",
+    "email": "Lnavarro@gmail.com",
     "password": "123456"
 }
 
@@ -33,7 +33,7 @@ Accept: application/json
 
 
 ### Limpiar Puertos de los Switches por ip
-POST http://127.0.0.1:8000/limpiar_ports/10.20.100.41
+GET http://127.0.0.1:8000/limpiar_ports/10.20.100.52
 Accept: application/json
 
 ### Limpiar Puertos de los Switches y Guardar en DB

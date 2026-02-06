@@ -84,6 +84,8 @@ def test_ssh_connection(hostname, username, password):
     finally:
         if client:
             client.close()
+            
+            
 def register_port_clear(ip, nombre, user_ip, pass_ip, description=""):
     db = SessionLocal()
     try:

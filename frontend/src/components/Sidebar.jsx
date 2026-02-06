@@ -15,6 +15,7 @@ function Sidebar() {
     { name: 'Perfil', icon: <User size={20} />, path: '/perfil' },
     { name: 'Configuración', icon: <Settings size={20} />, path: '/config' },
     { name: 'clear_port', icon: <Settings size={20} />, path: '/clear_port' },
+    { name: 'Gestion de Reportes', icon: <Settings size={20} />, path: '/Reportes' },
   ];
 
   return (

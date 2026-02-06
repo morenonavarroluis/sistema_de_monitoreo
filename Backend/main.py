@@ -1,5 +1,5 @@
 # main.py
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +9,10 @@ from controller.registrar_user import ver_usuarios
 from controller.login import login_usuario
 from controller.port_clear import test_ssh_connection, register_port_clear,log_message
 from model.ip_model import Clearport, SessionLocal
-from fastapi import HTTPException
+from fastapi.responses import StreamingResponse
+import json
+import asyncio
+
 app = FastAPI()
 
 # Esta es la única lista de verdad
@@ -45,7 +48,7 @@ def startup_event():
     scheduler.start()
     
     
-    run_ping_check(historial_real) 
+    # run_ping_check(historial_real) 
 
 @app.post("/login")
 async def usuario_login(datos: UserLogin):
@@ -71,91 +74,85 @@ async def get_usuarios():
 
 
 
-@app.post("/limpiar_ports")
-async def port_clear():
-    # 1. Abrir conexión a la DB
-    db = SessionLocal()
-    try:
-        # 2. Consultar todos los dispositivos registrados
-        dispositivos = db.query(Clearport).all()
-        
-        if not dispositivos:
-            raise HTTPException(status_code=404, detail="No hay IPs registradas en la base de datos")
+@app.get("/limpiar_ports")
+async def port_clear_stream():
+    def generate_progress():
+        db = SessionLocal()
+        try:
+            dispositivos = db.query(Clearport).all()
+            if not dispositivos:
+                yield f"data: {json.dumps({'error': 'No hay IPs registradas'})}\n\n"
+                return
 
-        resultados = []
-        fallos = 0
+            total = len(dispositivos)
+            
+            for index, equipo in enumerate(dispositivos):
+                # Ejecutamos la conexión (Asegúrate que test_ssh_connection sea rápida o usa hilos)
+                exito = test_ssh_connection(equipo.ip_port, equipo.user_ip, equipo.pass_ip)
+                
+                status = "OK" if exito else "Error"
+                progreso = int(((index + 1) / total) * 100)
 
-        # 3. Iterar usando los datos de la DB
-        for equipo in dispositivos:
-            # Usamos los campos específicos de cada fila: ip_port, user_ip, pass_ip
+                # Construimos el mensaje de actualización
+                payload = {
+                    "progress": progreso,
+                    "nombre": equipo.nombre,
+                    "ip": equipo.ip_port,
+                    "status": status,
+                    "current": index + 1,
+                    "total": total
+                }
+                
+                # Enviamos el dato al frontend
+                yield f"data: {json.dumps(payload)}\n\n"
+                
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        finally:
+            db.close()
+
+    return StreamingResponse(generate_progress(), media_type="text/event-stream")
+
+@app.get("/limpiar_ports/{ip}")
+async def port_clear_individual(ip: str): 
+    # Definimos el generador dentro
+    async def generate_event():
+        db = SessionLocal()
+        try:
+            # 1. Buscamos el equipo
+            equipo = db.query(Clearport).filter(Clearport.ip_port == ip).first()
+            
+            if not equipo:
+                yield f"data: {json.dumps({'error': 'Dispositivo no encontrado'})}\n\n"
+                return
+
+            # Al ser individual, definimos pasos manuales para la barra de progreso
+            # Paso 1: Conectando
+            yield f"data: {json.dumps({'progress': 20, 'nombre': equipo.nombre, 'status': 'Iniciando SSH...'})}\n\n"
+            
+            # Paso 2: Ejecución (Tu lógica de SSH)
             exito = test_ssh_connection(equipo.ip_port, equipo.user_ip, equipo.pass_ip)
             
+            # Paso 3: Resultado final
             status = "OK" if exito else "Error"
-            if not exito:
-                fallos += 1
-            
-            resultados.append({
-                "nombre": equipo.nombre,
-                "ip": equipo.ip_port, 
-                "status": status
-            })
-
-        # 4. Manejo de errores si todo falla
-        if fallos == len(dispositivos):
-            raise HTTPException(status_code=500, detail="No se pudo conectar a ningún dispositivo")
-
-        return {
-            "message": f"Proceso terminado. Éxitos: {len(dispositivos)-fallos}, Fallos: {fallos}",
-            "detalles": resultados
-        }
-    
-    except Exception as e:
-        # Capturar errores inesperados de DB o ejecución
-        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
-    
-    finally:
-        # 5. Siempre cerrar la sesión de la DB
-        db.close()
-
-@app.post("/limpiar_ports/{ip}")
-async def port_clear_individual(ip: str): 
-    db = SessionLocal()
-    try:
-        # 1. Buscamos específicamente el equipo que coincida con esa IP
-        equipo = db.query(Clearport).filter(Clearport.ip_port == ip).first()
-        
-        # 2. Si no existe en la DB, lanzamos error 404
-        if not equipo:
-            raise HTTPException(
-                status_code=404, 
-                detail=f"La IP {ip} no está registrada en la base de datos"
-            )
-
-        # 3. Ejecutamos la conexión usando los datos de ese registro
-        exito = test_ssh_connection(
-            hostname=equipo.ip_port, 
-            username=equipo.user_ip, 
-            password=equipo.pass_ip
-        )
-        
-        if not exito:
-            raise HTTPException(
-                status_code=500, 
-                detail=f"Error de conexión SSH con el equipo {equipo.nombre} ({ip})"
-            )
-
-        return {
-            "status": "success",
-            "message": f"Limpieza completada en {equipo.nombre}",
-            "datos": {
+            payload = {
+                "progress": 100,
                 "nombre": equipo.nombre,
                 "ip": equipo.ip_port,
-                "descripcion": equipo.description
+                "status": status,
+                "current": 1,
+                "total": 1
             }
-        }
+            yield f"data: {json.dumps(payload)}\n\n"
 
-    finally:
-        db.close()
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        finally:
+            db.close()
+
+    # IMPORTANTE: Retornar StreamingResponse
+    return StreamingResponse(generate_event(), media_type="text/event-stream")
+    
           
 def get_db():
     db = SessionLocal()
