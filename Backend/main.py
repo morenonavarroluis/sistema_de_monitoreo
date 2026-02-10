@@ -3,24 +3,37 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.background import BackgroundScheduler
-from controller.ping import get_telegram_config
+from pytz import timezone
 
-# Importamos los routers desde la carpeta routers
+# 1. Definimos la zona horaria y el scheduler GLOBALMENTE
+vzl_tz = timezone('America/Caracas')
+scheduler = BackgroundScheduler(timezone=vzl_tz)
+
 from routers import ports, auth, bot 
-from controller.ping import run_ping_check
+from controller.ping import run_ping_check,get_telegram_config
 
-# Esta es la lista que compartiremos con el scheduler
 historial_real = []
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # --- Lógica de Inicio (Startup) ---
-    scheduler = BackgroundScheduler()
-    # Programamos la tarea de ping
-    scheduler.add_job(run_ping_check, 'cron', hour='08,15,16', args=[historial_real])
+    
+    # Programamos la tarea: 08 y 16 (8am y 4pm)
+    # No vuelvas a declarar 'scheduler = ...' aquí
+    scheduler.add_job(
+        run_ping_check, 
+        'cron', 
+        hour='08,16', 
+        minute=0, 
+        args=[historial_real]
+    )
+    
     scheduler.start()
+    
+    # Ejecutamos una vez al arrancar para probar que funcione
     run_ping_check(historial_real)
-    yield  # Aquí es donde la aplicación "vive" y atiende peticiones
+    
+    yield  
     
     # --- Lógica de Cierre (Shutdown) ---
     scheduler.shutdown()
