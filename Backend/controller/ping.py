@@ -2,11 +2,31 @@ import subprocess
 import platform
 import requests
 from datetime import datetime
-from model.ip_model import SessionLocal, ConfigPing
-from sqlalchemy.orm import joinedload # Para optimizar la consulta
+from model.ip_model import SessionLocal, ConfigPing,Boot
+from sqlalchemy.orm import joinedload 
 
-CHAT_ID = "5909631520" 
-TOKEN = "8593251070:AAG_nx3e_8fzVQAG3YQD4d_kPxx6lTkX9Ws"
+# CHAT_ID = "5909631520" 
+# TOKEN = "8593251070:AAG_nx3e_8fzVQAG3YQD4d_kPxx6lTkX9Ws"
+
+def get_telegram_config():
+    db = SessionLocal()
+    try:
+        boot_config = db.query(Boot).first()
+        if boot_config and boot_config.chat_id and boot_config.token:
+            return boot_config.chat_id, boot_config.token
+        else:
+            raise ValueError("Configuración de Telegram no encontrada en la base de datos.")
+    except Exception as e:
+        print(f"Error obteniendo configuración de Telegram: {e}")
+        return None, None
+    finally:
+        db.close()
+
+
+CHAT_ID, TOKEN = get_telegram_config()
+
+if not TOKEN:
+    print("⚠️ ¡Advertencia! No se pudo cargar la configuración de Telegram.")
 
 def enviar_telegram(mensaje):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -79,5 +99,23 @@ def run_ping_check(historial_referencia):
         
     except Exception as e:
         print(f"❌ Error en run_ping_check: {e}")
+    finally:
+        db.close()
+
+
+def registrar_token(token, chat_id):
+    db = SessionLocal()
+    try:
+        boot_config = db.query(Boot).first()
+        if not boot_config:
+            boot_config = Boot(token=token, chat_id=chat_id)
+            db.add(boot_config)
+        else:
+            boot_config.token = token
+            boot_config.chat_id = chat_id
+        db.commit()
+        print("✅ Configuración de Telegram registrada/actualizada en DB.")
+    except Exception as e:
+        print(f"❌ Error registrando token en DB: {e}")
     finally:
         db.close()

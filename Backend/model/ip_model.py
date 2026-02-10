@@ -1,14 +1,7 @@
-from sqlalchemy import Column, Integer, String, create_engine, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker,relationship
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
+from .database import Base, engine ,SessionLocal
 
-# 1. URL corregida: usuario:password@host:puerto/nombre_base_de_datos
-# Asegúrate de que 'config_ping' sea el nombre de tu DB en phpMyAdmin
-SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://desarrollo:mercaldev2025@10.20.22.172:3306/config_ping"
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 
 # 2. Modelo de la tabla
 class Categoria(Base):
@@ -53,5 +46,11 @@ class Clearport(Base):
     user_ip = Column(String(100), nullable=False)
     pass_ip = Column(String(100), nullable=False)
     description = Column(String(200), nullable=True)
+
+class Boot(Base):
+    __tablename__ = "boot"
+    id = Column(Integer, primary_key=True, index=True)
+    chat_id = Column(String(100), nullable=False)
+    token = Column(String(200), nullable=False)
 
 Base.metadata.create_all(bind=engine)
