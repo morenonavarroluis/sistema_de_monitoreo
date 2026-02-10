@@ -8,7 +8,7 @@ export function useIpsUser() {
   // 1. Definimos la función para traer datos
   const fetchData = async () => {
     try {
-      const response = await api.get('/view_clearports');
+      const response = await api.get('ports/view_clearports');
       setData(response.data);
     } catch (error) {
       console.error('Error en GET:', error);
@@ -20,7 +20,7 @@ export function useIpsUser() {
     setLoading(true);
     try {
       // Enviamos el objeto completo (ip, usuario, etc.)
-      const response = await api.post('/registrar_ports_db', { 
+      const response = await api.post('ports/registrar_ports_db', { 
         ...datosFormulario, 
         accion: 'registrar' 
       });
@@ -35,6 +35,8 @@ export function useIpsUser() {
       setLoading(false);
     }
   };
+
+
 
   // 3. Cargamos los datos al iniciar
   useEffect(() => { 

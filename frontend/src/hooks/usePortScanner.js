@@ -19,8 +19,8 @@ export const usePortScanner = () => {
         const ipValue = (specificIp && typeof specificIp === 'string') ? specificIp : null;
 
         const endpoint = ipValue 
-            ? `${baseUrl}limpiar_ports/${ipValue}`
-            : `${baseUrl}limpiar_ports`;
+            ? `${baseUrl}ports/limpiar_ports/${ipValue}`
+            : `${baseUrl}ports/limpiar_ports`;
 
         const eventSource = new EventSource(endpoint);
         

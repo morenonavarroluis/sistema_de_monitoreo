@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.background import BackgroundScheduler
+from controller.ping import get_telegram_config
 
 # Importamos los routers desde la carpeta routers
 from routers import ports, auth, bot 
@@ -18,7 +19,7 @@ async def lifespan(app: FastAPI):
     # Programamos la tarea de ping
     scheduler.add_job(run_ping_check, 'cron', hour='08,15,16', args=[historial_real])
     scheduler.start()
-    
+    run_ping_check(historial_real)
     yield  # Aquí es donde la aplicación "vive" y atiende peticiones
     
     # --- Lógica de Cierre (Shutdown) ---
@@ -44,7 +45,17 @@ app.include_router(ports.router)
 app.include_router(auth.router)
 app.include_router(bot.router)
 
-# Ruta base para verificar el estado de los pings
 @app.get("/status", tags=["Estado"])
 async def get_latest_pings():
-    return historial_real
+    # 1. Obtenemos la config actual de la DB
+    chat_id, token = get_telegram_config()
+    
+    # 2. Retornamos un objeto compuesto
+    return {
+        "dispositivos": historial_real, # Los 41 elementos para la tabla
+        "config_bot": {
+            "token": token,
+            "chat_id": chat_id
+        } if token else None,
+        "total_monitoreo": len(historial_real)
+    }

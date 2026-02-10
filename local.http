@@ -1,5 +1,5 @@
 ### Login usuario
-POST http://127.0.0.1:8000/login
+POST http://127.0.0.1:8000/auth/login
 Content-Type: application/json
 
 {
@@ -51,4 +51,26 @@ Content-Type: application/json
 ### Ver Puertos Limpiados en DB
 GET http://127.0.0.1:8000/view_clearports
 Content-Type: application/json
+
+
+### registrar bot
+POST http://127.0.0.1:8000/bot/registrar_boot
+Content-Type: application/json
+
+{
+    "chat_id": "5909631520",
+    "token":"8593251070:AAG_nx3e_8fzVQAG3YQD4d_kPxx6lTkX9Ws"
+}
+
+###status de reportes
+POST http://127.0.0.1:8000/send-test-telegram
+Content-Type: application/json
+
+{}
+
+
+
+
+
+
 

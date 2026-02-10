@@ -44,6 +44,27 @@ function ClearPort() {
     }
   };
 
+const columnsPuertos = [
+  { label: 'Dirección IP' },
+  { label: 'Nombre del Switch' },
+  { label: 'Acciones SSH', className: 'text-center' }
+];
+
+const renderRowPuertos = (item, index) => (
+  <tr key={index} className="hover:bg-blue-50/50">
+    <td className="px-6 py-4 font-mono text-blue-600">{item.ip_port}</td>
+    <td className="px-6 py-4 font-medium text-gray-900">{item.nombre}</td>
+    <td className="px-6 py-4 text-center">
+      <button 
+        onClick={() => startScanning(item.ip_port)}
+        className="bg-indigo-600 text-white px-4 py-2 rounded text-xs font-bold"
+      >
+        Limpiar Puerto
+      </button>
+    </td>
+  </tr>
+);
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
@@ -106,6 +127,9 @@ function ClearPort() {
             <Table 
             data={data} 
             clearPortIndividual={(ip) => startScanning(ip)} 
+            columns={columnsPuertos} 
+            renderRow={renderRowPuertos} 
+            loading={loading}
           />
           </div>
 

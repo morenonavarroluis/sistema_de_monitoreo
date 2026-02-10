@@ -7,7 +7,7 @@ export function usePorts() {
 
   const fetchData = async () => {
     try {
-      const response = await api.get('view_clearports');
+      const response = await api.get('/ports/view_clearports');
       setData(response.data);
     } catch (error) {
       console.error('Error en GET:', error);
@@ -17,7 +17,7 @@ export function usePorts() {
   const clearPorts = async () => {
     setLoading(true);
     try {
-      const response = await api.post('/limpiar_ports', { accion: 'limpiar' });
+      const response = await api.post('/ports/limpiar_ports', { accion: 'limpiar' });
       
       // Alerta de éxito
       Swal.fire({
@@ -46,7 +46,7 @@ export function usePorts() {
   const clearPortIndividual = async (ip) => {
     setLoading(true);
     try {
-      const response = await api.post(`/limpiar_ports/${ip}`, { accion: 'limpiar' });
+      const response = await api.post(`/ports/limpiar_ports/${ip}`, { accion: 'limpiar' });
       Swal.fire({
         title: "¡Logrado!",
         text: response.data.message,

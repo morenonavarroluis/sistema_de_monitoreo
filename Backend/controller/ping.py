@@ -119,3 +119,23 @@ def registrar_token(token, chat_id):
         print(f"❌ Error registrando token en DB: {e}")
     finally:
         db.close()
+        
+# def obtener_historial():
+#     db = SessionLocal()
+#     try:
+#         historial = db.query(ConfigPing).options(joinedload(ConfigPing.categoria_rel)).all()
+#         resultado_historial = []
+#         for item in historial:
+#             nombre_cat = item.categoria_rel.nombre_categoria if item.categoria_rel else "SIN CATEGORÍA"
+#             resultado_historial.append({
+#                 "name": item.name or "Sin nombre",
+#                 "ip": item.ip,
+#                 "status": "Online" if item.status else "Offline",
+#                 "categoria": nombre_cat
+#             })
+#         return resultado_historial
+#     except Exception as e:
+#         print(f"❌ Error obteniendo historial: {e}")
+#         return []
+#     finally:
+#         db.close()
