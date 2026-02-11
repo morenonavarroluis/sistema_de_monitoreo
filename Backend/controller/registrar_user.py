@@ -1,6 +1,6 @@
 # controller/usuario_controller.py
 from model.ip_model import SessionLocal, Usuario
-
+from sqlalchemy.orm import Session
 def registrar_usuario(nombre: str, email: str, password: str):
     db = SessionLocal()
     try:
@@ -43,3 +43,16 @@ def ver_usuarios():
         return {"status": "error", "message": str(e)}
     finally:
         db.close()
+
+def crud_eliminar_usuario(db: Session, user_id: int):
+    try:
+        usuario = db.query(Usuario).filter(Usuario.id == user_id).first()
+        if not usuario:
+            return {"status": "error", "message": "Usuario no encontrado"}
+        
+        db.delete(usuario)
+        db.commit()
+        return {"status": "success", "message": "Usuario eliminado"}
+    except Exception as e:
+        db.rollback()
+        return {"status": "error", "message": str(e)}

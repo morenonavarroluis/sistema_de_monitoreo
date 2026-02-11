@@ -68,6 +68,9 @@ Content-Type: application/json
 
 {}
 
+### ELIMINIAR USUARIO
+DELETE  http://127.0.0.1:8000/auth/user/2
+Content-Type: application/json
 
 
 
