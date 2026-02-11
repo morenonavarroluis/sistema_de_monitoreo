@@ -45,14 +45,14 @@ function Login() {
           {/* 3. Agregamos el onSubmit al formulario */}
           <form className="px-5 py-7" onSubmit={handleSubmit}>
         <h1 className="font-bold text-center text-2xl mb-5 text-gray-800">Sistema de Monitoreo</h1>  
-            <label className="font-semibold text-sm text-gray-600 pb-1 block">Correo Electrónico</label>
+            <label className="font-semibold text-sm text-gray-600 pb-1 block">Usuario</label>
             <input 
-              type="email" 
+              type="text" 
               required
               className="border rounded-lg px-3 py-2 mt-1 mb-5 text-sm w-full focus:ring-blue-500 focus:border-blue-500 outline-none" 
-              placeholder="ejemplo@correo.com"
+              placeholder="Pmoreno"
               value={email}
-              onChange={(e) => setEmail(e.target.value)} // 4. Sincronizamos el estado
+              onChange={(e) => setEmail(e.target.value)} 
             />
             
             <label className="font-semibold text-sm text-gray-600 pb-1 block">Contraseña</label>

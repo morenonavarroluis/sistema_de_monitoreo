@@ -1,21 +1,11 @@
 import paramiko
 import time
 import re
-from model.ip_model import Clearport, SessionLocal
-
-
-db = SessionLocal()
-
-def get_all_clearports():
-    db = SessionLocal()
-    try:
-        clearports = db.query(Clearport).all()
-        return clearports
-    except Exception as e:
-        print(f"Error al obtener registros: {e}")
-        raise e
-    finally:        
-        db.close()
+from schemas.schemas import IpPortSchema
+from model.ip_model import *
+from dependencies import get_db
+from fastapi import Depends
+from sqlalchemy.orm import Session
 
 def log_message(hostname, msg, **kwargs):
     """Versión que acepta argumentos extra sin fallar"""
@@ -86,46 +76,60 @@ def test_ssh_connection(hostname, username, password):
             client.close()
             
             
-def register_port_clear(ip, nombre, user_ip, pass_ip, description=""):
-    db = SessionLocal()
+def register_port_clear(db: Session, datos: IpPortSchema):
     try:
         nuevo_registro = Clearport(
-            ip_port=ip,
-            nombre=nombre,
-            user_ip=user_ip,
-            pass_ip=pass_ip,
-            description=description
+            ip_port=datos.ip_port,
+            nombre=datos.nombre,
+            user_ip=datos.user_ip,
+            pass_ip=datos.pass_ip,
+            description=datos.description
         )
         db.add(nuevo_registro)
         db.commit()
-        db.refresh(nuevo_registro) # Opcional: para tener el ID generado
-        print(f"Registro de limpieza de puerto guardado para {ip}")
+        db.refresh(nuevo_registro)
         return nuevo_registro
     except Exception as e:
-        db.rollback() # Si hay error, deshace los cambios
-        print(f"Error al registrar: {e}")
+        db.rollback()
+        print(f"Error en la base de datos: {e}")
         raise e
-    finally:
-        db.close()
-    
-if __name__ == "__main__":
-   
-    dispositivos = get_all_clearports()
-    
-    if not dispositivos:
-        print("No se encontraron dispositivos en la base de datos.")
-    
-    for dispositivo in dispositivos:
-        # Usamos los atributos del modelo: ip_port, user_ip y pass_ip
-        print(f"\n--- Iniciando proceso en: {dispositivo.nombre} ({dispositivo.ip_port}) ---")
+            
+
+def delete_port_clear(record_id: int, db):
+    try:
+        # 1. Buscamos el registro
+        registro = db.query(Clearport).filter(Clearport.id == record_id).first()
         
-        exito = test_ssh_connection(
-            hostname=dispositivo.ip_port, 
-            username=dispositivo.user_ip, 
-            password=dispositivo.pass_ip
-        )
-        
-        if exito:
-            log_message(dispositivo.ip_port, "Proceso completado con éxito.")
+        if registro:
+            db.delete(registro)
+            db.commit()
+            # Es mejor devolver un diccionario simple o una respuesta FastAPI
+            return {"status": 200, "message": f'Registro con ID {record_id} eliminado exitosamente.'}
         else:
-            log_message(dispositivo.ip_port, "El proceso falló.")
+            return {"status": 404, "message": f'No se encontró el registro con ID {record_id}.'}
+            
+    except Exception as e:
+        db.rollback()
+        print(f"Error al eliminar en controlador: {e}")
+        raise e       
+
+
+
+def actualizar_port_clear(id_port, datos, db): 
+
+    db_item = db.query(Clearport).filter(Clearport.id == id_port).first()
+    
+    if not db_item:
+        return {"error": "No encontrado"} 
+
+    
+    db_item.ip_port = datos.ip_port
+    db_item.nombre = datos.nombre
+    db_item.user_ip = datos.user_ip
+    db_item.pass_ip = datos.pass_ip
+    db_item.description = datos.description
+
+    db.commit()
+    db.refresh(db_item)
+    return {"message": "Actualizado correctamente", "data": db_item}
+    

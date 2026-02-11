@@ -11,7 +11,7 @@ class UserLogin(BaseModel):
     password: str
 
 class IpPortSchema(BaseModel):
-    ip: str
+    ip_port: str
     nombre: str
     user_ip: str
     pass_ip: str

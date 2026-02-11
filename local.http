@@ -37,11 +37,11 @@ GET http://127.0.0.1:8000/limpiar_ports/10.20.100.52
 Accept: application/json
 
 ### Limpiar Puertos de los Switches y Guardar en DB
-POST http://127.0.0.1:8000/registrar_ports_db
+POST http://127.0.0.1:8000/ports/registrar_ports_db
 Content-Type: application/json
 
 {
-    "ip": "192.168.1.15",
+    "ip_port": "192.168.1.15",
     "nombre": "Puerto_Switch_01",
     "user_ip": "admin",
     "pass_ip": "secreto123",
@@ -73,6 +73,22 @@ DELETE  http://127.0.0.1:8000/auth/user/2
 Content-Type: application/json
 
 
+### ELIMINIAR IPport
+DELETE  http://127.0.0.1:8000/ports/delete_clearport/48
+Content-Type: application/json
+
+
+### Actualizar switch
+PUT  http://127.0.0.1:8000/ports/update_clearport/48
+Content-Type: application/json
+
+{
+    "ip_port" : "8.8.8.8",
+    "nombre": "manuel",
+    "user_ip": "manuel",
+    "pass_ip": "123456",
+    "description": "ciscoss"
+}
 
 
 

@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import timezone
 
-# 1. Definimos la zona horaria y el scheduler GLOBALMENTE
+
 vzl_tz = timezone('America/Caracas')
 scheduler = BackgroundScheduler(timezone=vzl_tz)
 
@@ -16,39 +16,38 @@ historial_real = []
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # --- Lógica de Inicio (Startup) ---
-    
-    # Programamos la tarea: 08 y 16 (8am y 4pm)
-    # No vuelvas a declarar 'scheduler = ...' aquí
     scheduler.add_job(
         run_ping_check, 
         'cron', 
-        hour='08,16', 
+        hour='08,12,16', 
         minute=0, 
         args=[historial_real]
     )
-    
     scheduler.start()
     
-    # Ejecutamos una vez al arrancar para probar que funcione
-    run_ping_check(historial_real)
-    
+    # run_ping_check(historial_real)
     yield  
     
-    # --- Lógica de Cierre (Shutdown) ---
+   
     scheduler.shutdown()
 
-# Inicializamos FastAPI con el ciclo de vida (lifespan)
+
 app = FastAPI(
     title="Sistema de Gestión de IPs",
     description="API modular para limpieza de puertos y monitoreo",
     lifespan=lifespan
 )
 
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
 # Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
