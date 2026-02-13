@@ -92,4 +92,18 @@ Content-Type: application/json
 
 
 
+### Registrar tiempo
+POST http://127.0.0.1:8000/bot/registrar_time
+Content-Type: application/json
+
+{
+    "time" : 9
+}
+
+
+### Registrar tiempo
+GET  http://127.0.0.1:8000/bot/ver_time
+Content-Type: application/json
+
+
 

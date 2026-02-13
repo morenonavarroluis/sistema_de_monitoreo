@@ -23,6 +23,8 @@ function ClearPort() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedSwitch, setSelectedSwitch] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
   const handleOpenEdit = (item) => {
   setSelectedSwitch(item);
   setIsEditModalOpen(true);
@@ -32,13 +34,43 @@ function ClearPort() {
     if (success) setIsModalOpen(false);
   };
 
-  const columnsPuertos = [{ label: 'Dirección IP' }, { label: 'Nombre del Switch' }, { label: 'Acciones SSH', className: 'text-center' }];
 
+  const columnsPuertos = [
+  { label: 'Dirección IP', key: 'ip_port' }, 
+  { label: 'Nombre del Switch', key: 'nombre' }, 
+  {
+    label: 'Acciones',
+    className: 'text-center',
+    render: (item) => (
+      <div className="flex gap-2 justify-center">
+        <button 
+          onClick={() => startScanning(item.ip_port)} // Antes handleClean
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors"
+        >
+          Limpiar Puerto
+        </button>
+        <button 
+          onClick={() => handleOpenEdit(item)} // Antes handleEdit
+          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors"
+        >
+          Editar
+        </button>
+        <button 
+          onClick={() => eliminarIp(item.id)} 
+          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors"
+        >
+          eliminar
+        </button>
+      </div>
+    )
+  }
+];
+   
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="flex-1 flex flex-col">
-        <Header />
+        <Header onMenuOpen={() => setIsSidebarOpen(true)}/>
         <main className="p-8">
           
           <ActionHeader 
@@ -58,7 +90,7 @@ function ClearPort() {
               data={data} 
               columns={columnsPuertos} 
               renderRow={(item, index) => (
-                <PortTableRow key={index} item={item} onScan={startScanning} onEdit={handleOpenEdit} onDelete={eliminarIp}/>
+                <PortTableRow columns={columnsPuertos} key={index} item={item} onScan={startScanning} onEdit={handleOpenEdit} onDelete={eliminarIp}/>
               )} 
               loading={loadingPorts || loading}
             />
@@ -89,20 +121,35 @@ function ClearPort() {
 
 // Puedes dejar componentes pequeños aquí abajo o en archivos separados
 const ActionHeader = ({ loading, currentDevice, onScanAll, onOpenModal }) => (
-  <div className='mb-6 flex items-center justify-between bg-white p-4 rounded-lg shadow-sm'>
-    <div>
+  <div className='mb-6 flex flex-col md:flex-row md:items-center justify-between bg-white p-4 rounded-lg shadow-sm gap-4'>
+    {/* Contenedor de Botones */}
+    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
       <button 
-        className={`font-bold py-2 px-6 rounded shadow-md transition-all ${loading ? 'bg-gray-400' : 'bg-blue-600 text-white'}`} 
+        className={`font-bold py-2 px-6 rounded shadow-md transition-all w-full sm:w-auto ${
+          loading ? 'bg-gray-400' : 'bg-blue-600 text-white hover:bg-blue-700'
+        }`} 
         onClick={() => onScanAll()} 
         disabled={loading}
       >
         {loading ? 'Procesando...' : 'Limpiar Todos'}
       </button>
-      <button className="bg-green-500 text-white font-bold py-2 px-6 rounded ml-3" onClick={onOpenModal}>
+      
+      <button 
+        className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded w-full sm:w-auto transition-colors" 
+        onClick={onOpenModal}
+      >
         + Registrar IP
       </button>
     </div>
-    {loading && <span className="text-blue-600 animate-pulse text-sm">Conectando: {currentDevice}</span>}
+
+    {/* Estado de Conexión */}
+    {loading && (
+      <div className="flex items-center justify-center md:justify-end bg-blue-50 md:bg-transparent p-2 md:p-0 rounded-md">
+        <span className="text-blue-600 animate-pulse text-sm font-medium">
+          <span className="md:hidden">Estado: </span>Conectando: {currentDevice}
+        </span>
+      </div>
+    )}
   </div>
 );
 

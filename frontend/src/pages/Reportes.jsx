@@ -7,14 +7,16 @@ import Modal from '../components/Modal';
 import { usePortScanner } from '../hooks/usePortScanner'; 
 import { IpStatus } from '../hooks/ipStatus';
 import Swal from 'sweetalert2';
+import { useProbarbot } from '../hooks/enviarTelegram';
+import { renderRowReporte } from '../components/ReporteIP';
 
 function Reportes() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data,fetchData, configBot,historialIps, registrarBot } = IpStatus();
   const { progress, loading, currentDevice } = usePortScanner();
-
+  const { horasdata, botloading, enviarPruebaTelegram } = useProbarbot();
   const [formData, setFormData] = useState({ chat_id: '', token: '' });
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -27,103 +29,90 @@ function Reportes() {
       setFormData({ chat_id: '', token: '' });
     }
   };
-  const columnsReporte = [
-  { label: 'Estado' },
-  { label: 'Dispositivo' },
-  { label: 'IP' },
-  { label: 'Categoría' }
+ const columnsReporte = [
+  { label: 'Nombre', key: 'name' }, 
+  { label: 'Status', key: 'status', render: (item) => (
+    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+      {item.status}
+    </span>
+  )},
+   { label: 'Ip', key: 'ip' },
+   { label: 'Categoria', key: 'name'}
+ 
 ];
-  const enviarPruebaTelegram = async () => {
-  // Opcional: Podrías poner un estado 'loading' para deshabilitar el botón
-  try {
-    const response = await api.post('/send-test-telegram');
-    if (response.status === 200) {
-      Swal.fire({
-        title: "Prueba Exitosa",
-        text: "este es el mensaje de validacion desde tu panel de reportes!",
-        icon: "success"
-      });
-    } else {
-      Swal.fire({
-        title: "Error al Enviar",
-        text: "No se pudo enviar el mensaje de prueba. Revisa la configuración del bot",
-        icon: "error"
-      });
-     
-    }
-  } catch (error) {
-    const errorMsg = error.response?.data?.message || "Error de conexión con el servidor";
-     Swal.fire({
-        title: "Error",
-        text: errorMsg,
-        icon: "error"
-      });
-    
-    console.error("Test Error:", error);
-  }
-};
-const renderRowReporte = (item, index) => (
-      <tr key={item.id_ip || index} className="hover:bg-gray-50 transition-colors border-b border-gray-100">
-        <td className="px-6 py-4">
-          {/* Estado con bolita de color */}
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-            item.status === 'Online' 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-red-100 text-red-700'
-          }`}>
-            <span className={`w-2 h-2 mr-1.5 rounded-full ${
-              item.status === 'Online' ? 'bg-green-500' : 'bg-red-500'
-            }`}></span>
-            {item.status.toUpperCase()}
-          </span>
-        </td>
-        
-        {/* item.name debe existir en tu objeto JSON */}
-        <td className="px-6 py-4 font-medium text-gray-900">
-          {item.name || 'Sin Nombre'}
-        </td>
-        
-        {/* item.ip debe existir en tu objeto JSON */}
-        <td className="px-6 py-4 font-mono text-sm text-blue-600 bg-blue-50/30">
-          {item.ip}
-        </td>
-        
-        {/* item.categoria debe existir en tu objeto JSON */}
-        <td className="px-6 py-4">
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            {item.categoria}
-          </span>
-        </td>
-      </tr>
-);
+
+
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="flex-1 flex flex-col">
-        <Header />
+        <Header onMenuOpen={() => setIsSidebarOpen(true)} />
         <main className="p-8">
           
           {/* HEADER DE LA SECCIÓN */}
-          <div className='mb-6 flex items-center justify-between bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500'>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">Gestión de Bot Telegram</h2>
-              <p className="text-sm text-gray-500">Configuración de notificaciones y monitoreo en tiempo real</p>
-            </div>
-            <div className="flex gap-3">
-              <button 
-                onClick={enviarPruebaTelegram}
-                className="bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold py-2 px-4 rounded transition-all border border-blue-200"
+       <div className='mb-6 flex flex-col md:flex-row items-center justify-between bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500 gap-4'>
+          {/* Sección de Título */}
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-gray-800">Gestión de Bot Telegram</h2>
+            <p className="text-sm text-gray-500">Configuración de notificaciones y monitoreo</p>
+          </div>
+
+          {/* Sección del Selector con estilo mejorado */}
+          <div className="flex flex-col min-w-[200px]">
+           
+            <div className="relative">
+              <select
+                name="alert_time"
+                id="alert_time"
+                className="block w-full pl-10 pr-10 py-2.5 text-sm border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 border appearance-none transition-all cursor-pointer text-gray-700 font-medium"
               >
-                 Probar Conexión
-              </button>
-              <button 
-                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow-md transition-all" 
-                onClick={() => setIsModalOpen(true)}
-              >
-                 Configurar Bot
-              </button>
+                <option value="">
+                    {botloading ? "Cargando..." : "Selecciona una hora"}
+                  </option>
+                {data && data.length > 0 ? (
+                  horasdata.map((item) => (
+                    <option key={item.id} value={item.time}>
+                      {item.time < 10 ? `0${item.time}` : item.time}:00 {item.time < 12 ? 'AM' : 'PM'}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>Sin registros</option>
+                )}
+              </select>
+              
+              {/* Icono de Reloj a la izquierda */}
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+
+              {/* Flecha a la derecha */}
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </div>
             </div>
           </div>
+
+          {/* Botones de Acción */}
+          <div className="flex gap-3 shrink-0">
+            <button 
+              onClick={enviarPruebaTelegram}
+              className="flex items-center gap-2 bg-white text-blue-600 hover:bg-blue-50 font-semibold py-2.5 px-4 rounded-lg transition-all border border-blue-200 shadow-sm text-sm"
+            >
+              <span className="hidden sm:inline">Probar Conexión</span>
+              <span className="sm:hidden">Probar</span>
+            </button>
+            <button 
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all text-sm" 
+              onClick={() => setIsModalOpen(true)}
+            >
+              Configurar Bot
+            </button>
+          </div>
+        </div>
 
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -156,7 +145,7 @@ const renderRowReporte = (item, index) => (
             <Table 
               data={data} 
               columns={columnsReporte} 
-              renderRow={renderRowReporte}
+              renderRow={(item, index) => renderRowReporte(item, index)}
               emptyMessage="No hay resultados de ping todavía."
             />
           </div>

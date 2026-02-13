@@ -52,5 +52,11 @@ class Boot(Base):
     id = Column(Integer, primary_key=True, index=True)
     chat_id = Column(String(100), nullable=False)
     token = Column(String(200), nullable=False)
+    
+
+class Alert(Base):
+    __tablename__ = "alert"
+    id_time = Column(Integer, primary_key=True, index=True)
+    time = Column(String(100), nullable=False)
 
 Base.metadata.create_all(bind=engine)

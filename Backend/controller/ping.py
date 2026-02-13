@@ -2,7 +2,7 @@ import subprocess
 import platform
 import requests
 from datetime import datetime
-from model.ip_model import SessionLocal, ConfigPing,Boot
+from model.ip_model import SessionLocal, ConfigPing,Boot,Alert
 from sqlalchemy.orm import joinedload 
 
 # CHAT_ID = "5909631520" 
@@ -120,22 +120,35 @@ def registrar_token(token, chat_id):
     finally:
         db.close()
         
-# def obtener_historial():
-#     db = SessionLocal()
-#     try:
-#         historial = db.query(ConfigPing).options(joinedload(ConfigPing.categoria_rel)).all()
-#         resultado_historial = []
-#         for item in historial:
-#             nombre_cat = item.categoria_rel.nombre_categoria if item.categoria_rel else "SIN CATEGORÍA"
-#             resultado_historial.append({
-#                 "name": item.name or "Sin nombre",
-#                 "ip": item.ip,
-#                 "status": "Online" if item.status else "Offline",
-#                 "categoria": nombre_cat
-#             })
-#         return resultado_historial
-#     except Exception as e:
-#         print(f"❌ Error obteniendo historial: {e}")
-#         return []
-#     finally:
-#         db.close()
+def registrar_alert_time(time_int:int):
+    db = SessionLocal()
+    try:
+        new_register = Alert(time=time_int)
+        db.add(new_register)
+        db.commit()
+        print("Nuevo registro exitoso")
+    except Exception as e:
+        print(f"❌ Error registrando tiempo de alerta en DB: {e}")
+    finally:
+        db.close()
+
+def view_alert():
+    db =  SessionLocal()
+    try:
+       db = SessionLocal()
+       try:
+            
+            registros = db.query(Alert).all()
+            
+            if not registros:
+                return None
+            return registros
+       except Exception as e:
+            print(f"Error al ver los registros: {e}")
+            return None
+       finally:
+            db.close()
+    except Exception as e:
+        print(f"Error al ver los registros")
+        
+    

@@ -4,33 +4,39 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import timezone
+from routers import ports, auth, bot 
+from controller.ping import run_ping_check,get_telegram_config,view_alert
 
 
 vzl_tz = timezone('America/Caracas')
 scheduler = BackgroundScheduler(timezone=vzl_tz)
 
-from routers import ports, auth, bot 
-from controller.ping import run_ping_check,get_telegram_config
-
 historial_real = []
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    scheduler.add_job(
-        run_ping_check, 
-        'cron', 
-        hour='08,12,16', 
-        minute=0, 
-        args=[historial_real]
-    )
+    # 1. Obtener las horas de la DB
+    horas_db = view_alert()
+    
+    if horas_db:
+        horas = ",".join([str(r.time) for r in horas_db])
+        
+        scheduler.add_job(
+            run_ping_check, 
+            'cron', 
+            hour=horas, 
+            minute=0, 
+            args=[historial_real]
+        )
+        print(f" Scheduler iniciado con horas: {horas}")
+    else:
+        print("No hay horas configuradas en la DB. Scheduler no programado.")
+
     scheduler.start()
     
-    # run_ping_check(historial_real)
     yield  
     
-   
     scheduler.shutdown()
-
 
 app = FastAPI(
     title="Sistema de Gestión de IPs",

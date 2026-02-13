@@ -20,3 +20,6 @@ class IpPortSchema(BaseModel):
 class BootSchema(BaseModel):
     token: str
     chat_id: str
+    
+class AlertTimeSchema(BaseModel):
+    time: int

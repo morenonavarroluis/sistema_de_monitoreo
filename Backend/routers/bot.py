@@ -1,6 +1,8 @@
 from fastapi import APIRouter
-from schemas.schemas import BootSchema
-from controller.ping import registrar_token,get_telegram_config
+from schemas.schemas import BootSchema,AlertTimeSchema
+from controller.ping import registrar_token,get_telegram_config,registrar_alert_time,view_alert
+from fastapi import APIRouter, HTTPException
+import httpx # Recomendado para FastAPI asíncrono
 
 
 router = APIRouter(prefix="/bot", tags=["Configuración Bot"])
@@ -10,10 +12,6 @@ async def registrar_boot(datos: BootSchema):
     registrar_token(datos.token, datos.chat_id)
     return {"message": "Boot registrado exitosamente"}
 
-from fastapi import APIRouter, HTTPException
-import httpx # Recomendado para FastAPI asíncrono
-
-router = APIRouter()
 
 @router.post("/send-test-telegram")
 async def send_test_telegram():
@@ -44,3 +42,29 @@ async def send_test_telegram():
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error de red: {str(e)}")
+    
+@router.post("/registrar_time")
+def registrar_time(datos: AlertTimeSchema):
+    try:
+        registrar_alert_time(datos.time)
+        return {"status": "success", "message": f"Tiempo actualizado a {datos.time}"}
+    except Exception:
+        raise HTTPException(status_code=500, detail="Error interno al registrar el tiempo")
+
+
+@router.get("/ver_time")
+def ver_time():
+    try:
+        registros = view_alert()
+        
+        if registros is None:
+            return {"status": 404, "message": "No hay registros disponibles"}
+            
+        return {
+            "status": 200, 
+            "message": "Registros recuperados con éxito",
+            "data": registros
+        }
+    except Exception:
+        raise HTTPException(status_code=500, detail="Error interno al registrar el tiempo")
+    
