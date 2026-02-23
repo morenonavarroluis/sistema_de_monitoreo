@@ -1,43 +1,47 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from .database import Base, engine ,SessionLocal
+from .database import Base, engine, SessionLocal
 
-
-# 2. Modelo de la tabla
+# --- TABLAS DE CATEGORÍAS E IPs ---
 class Categoria(Base):
     __tablename__ = "categoria"
-
     id_categoria = Column(Integer, primary_key=True, index=True)
     nombre_categoria = Column(String(100), nullable=False)
-
-    # Relación inversa: Permite acceder a todas las IPs de una categoría
-    # Ejemplo: mi_categoria.ips
+    
     ips = relationship("ConfigPing", back_populates="categoria_rel")
 
 class ConfigPing(Base):
     __tablename__ = "ip"
-
     id_ip = Column(Integer, primary_key=True, index=True)
     ip = Column(String(200), nullable=False)
     name = Column(String(200), nullable=True)
-    
-    # 1. Creamos la llave foránea que apunta al ID de la tabla categoria
     id_categoria = Column(Integer, ForeignKey("categoria.id_categoria"), nullable=False)
-
-    # 2. Creamos la relación para acceder al objeto Categoria directamente
-    # Ejemplo: mi_ip.categoria_rel.nombre_categoria
+    
     categoria_rel = relationship("Categoria", back_populates="ips")
 
-# 3. Forma correcta de crear las tablas
+# --- TABLAS DE USUARIOS Y ROLES ---
+# Definimos Rol PRIMERO y con nombre estándar (Rol)
+class Rol(Base):
+    __tablename__ = "roles"
+    id_rol = Column(Integer, primary_key=True, index=True)
+    nombre_rol = Column(String(100), nullable=False)
+    
+    # Apunta a la clase "Usuario"
+    usuarios = relationship("Usuario", back_populates="rol")
 
 class Usuario(Base):
     __tablename__ = "usuarios"
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(100))
-    email = Column(String(100), unique=True, index=True)
-    password = Column(String(100), index=True)
+    usuario = Column(String(100), unique=True, index=True)
+    password = Column(String(100)) 
+    gmail = Column(String(100), unique=True, index=True)
+    id_rol = Column(Integer, ForeignKey("roles.id_rol"), nullable=False)
+    
+    # Ahora coincide con el nombre de la clase de arriba: "Rol"
+    rol = relationship("Rol", back_populates="usuarios")
 
-
+# --- OTRAS TABLAS ---
 class Clearport(Base):
     __tablename__ = "clearport"
     id = Column(Integer, primary_key=True, index=True)
@@ -52,11 +56,11 @@ class Boot(Base):
     id = Column(Integer, primary_key=True, index=True)
     chat_id = Column(String(100), nullable=False)
     token = Column(String(200), nullable=False)
-    
 
 class Alert(Base):
     __tablename__ = "alert"
     id_time = Column(Integer, primary_key=True, index=True)
     time = Column(String(100), nullable=False)
 
+# Crear las tablas en la base de datos
 Base.metadata.create_all(bind=engine)

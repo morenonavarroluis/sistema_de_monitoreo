@@ -19,7 +19,7 @@ Content-Type: application/json
 }
 
 ### Ver usuarios
-GET  http://127.0.0.1:8000/view_user
+GET  http://127.0.0.1:8000/auth/view_user
 Content-Type: application/json
 
 

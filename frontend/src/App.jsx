@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Monitoreo from './pages/Monitoreo';
 import ClearPort from './pages/Clearport';
 import Reportes from './pages/Reportes';
+import Usuarios from './pages/Usuarios';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/monitoreo" element={<Monitoreo />} />
         <Route path="/clear_port" element={<ClearPort />} />
         <Route path="/Reportes" element={<Reportes />} />
+        <Route path="/Usuarios" element={<Usuarios />} />
       
       </Routes>
     </Router>

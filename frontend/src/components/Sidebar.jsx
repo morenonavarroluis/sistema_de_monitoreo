@@ -13,6 +13,7 @@ function Sidebar({ isOpen, onClose }) {
   const menuItems = [
     { name: 'Limpiar Puertos', icon: <Settings size={20} />, path: '/clear_port' },
     { name: 'Gestión de Reportes', icon: <Settings size={20} />, path: '/Reportes' },
+    { name: 'Gestión de Usuarios', icon: <Settings size={20} />, path: '/Usuarios' },
   ];
 
   return (
