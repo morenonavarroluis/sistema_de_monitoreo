@@ -4,35 +4,40 @@ import api from '../services/api';
 import Swal from 'sweetalert2';
 function Login() {
   const baseUrl = import.meta.env.VITE_API_URL;
-  const [email, setEmail] = useState('');
+  const [usuario, setUsuario] = useState(''); // Cambiado de email a usuario
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Para feedback visual
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     
     try {
-      setIsLoading(true);
-      const response = await api.post(`${baseUrl}auth/login`, { email, password });
+      // Nota: Si 'api' ya tiene baseURL, no necesitas `${baseUrl}`
+      const response = await api.post(`auth/login`, { 
+        usuario: usuario, 
+        password: password 
+      });
 
       const data = response.data;
 
-      if (data.status === "success") {
-        // localStorage.setItem('token', data.token); 
-
-        // 4. REDIRECCIONAR AL DASHBOARD
-          navigate('/clear_port'); 
+      // IMPORTANTE: FastAPI devuelve 'access_token', no 'token' ni 'status'
+      // Si usas la lógica de OAuth2 que armamos antes, el check es así:
+      if (data.access_token) {
+        localStorage.setItem('token', data.access_token); 
+        navigate('/clear_port'); 
       } else {
-        Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "Usuario o contraseña incorrectos",
-            // footer: '<a href="">¿Olvidaste tu contraseña?</a>'
-          });
+        throw new Error("No se recibió el token");
       }
+
     } catch (error) {
       console.error('Error:', error);
-    }finally {
+      Swal.fire({
+        icon: "error",
+        title: "Error de acceso",
+        text: error.response?.data?.detail || "Usuario o contraseña incorrectos",
+      });
+    } finally {
       setIsLoading(false); 
     }
   };
@@ -51,8 +56,8 @@ function Login() {
               required
               className="border rounded-lg px-3 py-2 mt-1 mb-5 text-sm w-full focus:ring-blue-500 focus:border-blue-500 outline-none" 
               placeholder="Pmoreno"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)} 
+              value={usuario}
+              onChange={(e) => setUsuario(e.target.value)} 
             />
             
             <label className="font-semibold text-sm text-gray-600 pb-1 block">Contraseña</label>

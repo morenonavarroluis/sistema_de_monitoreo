@@ -40,6 +40,7 @@ class Usuario(Base):
     
     # Ahora coincide con el nombre de la clase de arriba: "Rol"
     rol = relationship("Rol", back_populates="usuarios")
+    
 
 # --- OTRAS TABLAS ---
 class Clearport(Base):

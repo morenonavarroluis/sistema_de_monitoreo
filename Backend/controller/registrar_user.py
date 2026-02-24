@@ -1,27 +1,38 @@
 # controller/usuario_controller.py
 from model.ip_model import SessionLocal, Usuario
 from sqlalchemy.orm import Session
-def registrar_usuario(nombre: str, email: str, password: str):
+from schemas.schemas import UserSchema  
+from passlib.context import CryptContext
+import bcrypt # Asegúrate de tenerlo instalado (pip install bcrypt)
+
+def registrar_usuario(datos: UserSchema):
     db = SessionLocal()
     try:
-        # 1. Crear la instancia
-        nuevo_usuario = Usuario(nombre=nombre, email=email, password=password)
+        # 1. Convertir la contraseña a bytes (necesario para bcrypt)
+        password_plano = datos.password.encode('utf-8')
+        
+        # 2. Generar el hash directamente con bcrypt
+        # Esto evita los errores internos de passlib
+        salt = bcrypt.gensalt()
+        password_hasheada = bcrypt.hashpw(password_plano, salt).decode('utf-8')
+
+        # 3. Crear el usuario
+        nuevo_usuario = Usuario(
+            nombre=datos.nombre,
+            gmail=datos.gmail,
+            usuario=datos.usuario,
+            id_rol=datos.roles,
+            password=password_hasheada # Guardamos el string del hash
+        )
+        
         db.add(nuevo_usuario)
-        
-        # 2. Confirmar cambios
         db.commit()
-        
-        # 3. Refrescar para obtener el ID generado (opcional si solo devuelves el nombre)
         db.refresh(nuevo_usuario)
         
         return {
-            "status": "success", 
+            "status": "success",
             "message": "Usuario registrado correctamente",
-            "user": {
-                "id": nuevo_usuario.id,
-                "nombre": nuevo_usuario.nombre,
-                "email": nuevo_usuario.email
-            }
+            "id": nuevo_usuario.id
         }
     except Exception as e:
         db.rollback()

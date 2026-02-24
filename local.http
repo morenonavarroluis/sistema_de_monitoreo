@@ -1,10 +1,14 @@
+@baseURL=http://127.0.0.1:8000
+@tokenURL=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJsbmF2YXJyb0BnbWFpbC5jb20iLCJleHAiOjE3NzE5NjMwNTJ9.V6WFEUqfLj_Q6AjATxOmVTqifp4vWdSVAZDHu__04dQ
+
+
 ### Login usuario
-POST http://127.0.0.1:8000/auth/login
+POST {{baseURL}}/auth/login
 Content-Type: application/json
 
 {
     
-    "email": "test@test.com",
+    "usuario": "Lnavarro",
     "password": "123456"
 }
 
@@ -21,6 +25,20 @@ Content-Type: application/json
 ### Ver usuarios
 GET  http://127.0.0.1:8000/auth/view_user
 Content-Type: application/json
+Authorization: Bearer {{tokenURL}}
+
+### Registrar usuario
+POST {{baseURL}}/auth/user
+Content-Type: application/json
+
+
+{
+    "nombre": "luis",
+    "usuario": "luisnavarro",
+    "gmail": "luisnavarro@gmail.com",
+    "password": "123456",
+    "roles": 1
+}
 
 
 ### Status 

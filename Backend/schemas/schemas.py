@@ -3,11 +3,13 @@ from typing import Optional
 
 class UserSchema(BaseModel):
     nombre: str
-    email: str
+    usuario: str
+    gmail: str
     password: str
+    roles: int
 
 class UserLogin(BaseModel):
-    email: str
+    usuario: str
     password: str
 
 class IpPortSchema(BaseModel):
