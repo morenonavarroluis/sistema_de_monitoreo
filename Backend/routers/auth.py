@@ -26,12 +26,13 @@ async def usuario_login(datos: UserLogin):
 @router.post("/user")
 async def usuario_registro(datos: UserSchema):
     return registrar_usuario(datos)
+
 @router.get("/view_user")
 async def get_usuarios(user = Depends(obtener_usuario_actual)): 
     return ver_usuarios()
 
 @router.delete("/user/{user_id}")
-async def delete_user_endpoint(user_id: int, db: Session = Depends(get_db)):
+async def delete_user_endpoint(user_id: int, db: Session = Depends(get_db), user = Depends(obtener_usuario_actual)):
     # Llamamos a la lógica pasándole la sesión
     resultado = crud_eliminar_usuario(db, user_id)
     

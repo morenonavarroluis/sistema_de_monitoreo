@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from .database import Base, engine, SessionLocal
 
-# --- TABLAS DE CATEGORÍAS E IPs ---
+# --- CATEGORÍAS E IPs ---
 class Categoria(Base):
     __tablename__ = "categoria"
     id_categoria = Column(Integer, primary_key=True, index=True)
@@ -19,30 +19,44 @@ class ConfigPing(Base):
     
     categoria_rel = relationship("Categoria", back_populates="ips")
 
-# --- TABLAS DE USUARIOS Y ROLES ---
-# Definimos Rol PRIMERO y con nombre estándar (Rol)
+# --- USUARIOS Y ROLES ---
+
+class RolPermiso(Base):
+    __tablename__ = "rol_permisos"
+    id_rol_permiso = Column(Integer, primary_key=True, index=True)
+    id_rol = Column(Integer, ForeignKey("roles.id_rol"), nullable=False)
+    id_permiso = Column(Integer, ForeignKey("permisos.id_permiso"), nullable=False)
+
 class Rol(Base):
     __tablename__ = "roles"
     id_rol = Column(Integer, primary_key=True, index=True)
     nombre_rol = Column(String(100), nullable=False)
     
-    # Apunta a la clase "Usuario"
     usuarios = relationship("Usuario", back_populates="rol")
+    
+    # RELACIÓN CLAVE: Permite acceder a los permisos directamente
+    # mi_rol.permisos -> devolverá una lista de objetos Permiso
+    permisos = relationship("Permiso", secondary="rol_permisos", back_populates="roles")
+
+class Permiso(Base):
+    __tablename__ = "permisos"
+    id_permiso = Column(Integer, primary_key=True, index=True)
+    nombre_permiso = Column(String(100), nullable=False)
+    
+    roles = relationship("Rol", secondary="rol_permisos", back_populates="permisos")
 
 class Usuario(Base):
     __tablename__ = "usuarios"
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(100))
     usuario = Column(String(100), unique=True, index=True)
-    password = Column(String(100)) 
+    password = Column(String(255)) # TIP: Usa 255 para hashes de contraseñas
     gmail = Column(String(100), unique=True, index=True)
     id_rol = Column(Integer, ForeignKey("roles.id_rol"), nullable=False)
     
-    # Ahora coincide con el nombre de la clase de arriba: "Rol"
     rol = relationship("Rol", back_populates="usuarios")
-    
 
-# --- OTRAS TABLAS ---
+# --- OTRAS TABLAS (Sin cambios) ---
 class Clearport(Base):
     __tablename__ = "clearport"
     id = Column(Integer, primary_key=True, index=True)
@@ -63,5 +77,4 @@ class Alert(Base):
     id_time = Column(Integer, primary_key=True, index=True)
     time = Column(String(100), nullable=False)
 
-# Crear las tablas en la base de datos
 Base.metadata.create_all(bind=engine)

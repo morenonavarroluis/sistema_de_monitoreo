@@ -46,7 +46,7 @@ def ver_usuarios():
         usuarios = db.query(Usuario).all()
         # Convertimos los objetos de SQLAlchemy a una lista de dicts pura
         lista_usuarios = [
-            {"id": user.id, "nombre": user.nombre,"usuario": user.usuario, "gmail": user.gmail, "roles": user.rol.nombre_rol} 
+            {"id": user.id, "nombre": user.nombre,"usuario": user.usuario, "gmail": user.gmail, "roles": user.rol.nombre_rol , "permisos": [p.nombre_permiso for p in user.rol.permisos]} 
             for user in usuarios
         ]
         return {"status": "success", "data": lista_usuarios}

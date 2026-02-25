@@ -3,12 +3,13 @@ from schemas.schemas import BootSchema,AlertTimeSchema
 from controller.ping import registrar_token,get_telegram_config,registrar_alert_time,view_alert
 from fastapi import APIRouter, HTTPException
 import httpx # Recomendado para FastAPI asíncrono
-
+from acce_token import obtener_usuario_actual
+from fastapi import Depends
 
 router = APIRouter(prefix="/bot", tags=["Configuración Bot"])
 
 @router.post("/registrar_boot")
-async def registrar_boot(datos: BootSchema):
+async def registrar_boot(datos: BootSchema, user = Depends(obtener_usuario_actual)):
     registrar_token(datos.token, datos.chat_id)
     return {"message": "Boot registrado exitosamente"}
 
@@ -44,7 +45,7 @@ async def send_test_telegram():
         raise HTTPException(status_code=500, detail=f"Error de red: {str(e)}")
     
 @router.post("/registrar_time")
-def registrar_time(datos: AlertTimeSchema):
+def registrar_time(datos: AlertTimeSchema, user = Depends(obtener_usuario_actual)):
     try:
         registrar_alert_time(datos.time)
         return {"status": "success", "message": f"Tiempo actualizado a {datos.time}"}
@@ -53,7 +54,7 @@ def registrar_time(datos: AlertTimeSchema):
 
 
 @router.get("/ver_time")
-def ver_time():
+def ver_time(user = Depends(obtener_usuario_actual)):
     try:
         registros = view_alert()
         

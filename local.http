@@ -1,5 +1,5 @@
 @baseURL=http://127.0.0.1:8000
-@tokenURL=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJsbmF2YXJyb0BnbWFpbC5jb20iLCJleHAiOjE3NzE5NjMwNTJ9.V6WFEUqfLj_Q6AjATxOmVTqifp4vWdSVAZDHu__04dQ
+@tokenURL=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJsdWlzbmF2YXJybyIsImV4cCI6MTc3MjA0NTQyNX0.Akkbyv6y5CzIs0JuVzTZDV5kG95nwUKegCXlhRJtEZs
 
 
 ### Login usuario
@@ -8,19 +8,10 @@ Content-Type: application/json
 
 {
     
-    "usuario": "Lnavarro",
+    "usuario": "luisnavarro",
     "password": "123456"
 }
 
-### Crear usuario
-POST http://127.0.0.1:8000/user
-Content-Type: application/json
-
-{
-    "nombre": "luis",
-    "email": "Lnavarro@gmail.com",
-    "password": "123456"
-}
 
 ### Ver usuarios
 GET  http://127.0.0.1:8000/auth/view_user
