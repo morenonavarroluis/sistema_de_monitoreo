@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Activity,Trash2,Users,FileText, LogOut, X } from 'lucide-react';
+import { Activity,History,Trash2,Users,FileText, LogOut, X } from 'lucide-react';
 
 // Recibe isOpen y onClose desde el padre
 function Sidebar({ isOpen, onClose }) {
@@ -14,6 +14,7 @@ function Sidebar({ isOpen, onClose }) {
     { name: 'Limpiar Puertos', icon: <Trash2 size={20} />, path: '/clear_port' },
     { name: 'Gestión de Reportes', icon: <FileText size={20} />, path: '/Reportes' },
     { name: 'Gestión de Usuarios', icon: <Users size={20} />, path: '/Usuarios' },
+    { name: 'Historial', icon: <History size={20} />, path: '/History' },
   ];
 
   return (
