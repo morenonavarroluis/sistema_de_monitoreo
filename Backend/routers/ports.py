@@ -12,7 +12,7 @@ router = APIRouter(prefix="/ports", tags=["Gestión de Puertos"])
 
 
 @router.get("/limpiar_ports")
-async def port_clear_stream(db: Session = Depends(get_db), user = Depends(obtener_usuario_actual)):
+async def port_clear_stream(db: Session = Depends(get_db), user = Depends(tiene_permiso("limpiar_ports"))):
     def generate_progress():
         # Usamos la 'db' que viene por parámetro, no creamos SessionLocal() aquí
         try:
@@ -49,7 +49,7 @@ async def port_clear_stream(db: Session = Depends(get_db), user = Depends(obtene
     return StreamingResponse(generate_progress(), media_type="text/event-stream")
 
 @router.get("/limpiar_ports/{ip}")
-async def port_clear_individual(ip: str, db: Session = Depends(get_db), user = Depends(obtener_usuario_actual)): 
+async def port_clear_individual(ip: str, db: Session = Depends(get_db), user = Depends(tiene_permiso("limpiar_port"))): 
     async def generate_event():
         try:
             equipo = db.query(Clearport).filter(Clearport.ip_port == ip).first()
@@ -77,21 +77,21 @@ async def port_clear_individual(ip: str, db: Session = Depends(get_db), user = D
     return StreamingResponse(generate_event(), media_type="text/event-stream")
 
 @router.post("/registrar_ports_db")
-async def port_clear_db(datos: IpPortSchema, db: Session = Depends(get_db), user = Depends(obtener_usuario_actual)):
+async def port_clear_db(datos: IpPortSchema, db: Session = Depends(get_db), user = Depends(tiene_permiso("registrar_ip"))):
     return register_port_clear(db, datos)
 
 
 @router.get("/view_clearports")    
-async def view_clearports(db: Session = Depends(get_db), user = Depends(obtener_usuario_actual)):
+async def view_clearports(db: Session = Depends(get_db), user = Depends(tiene_permiso("ver_ip"))):
     return db.query(Clearport).all()
 
 @router.put("/update_clearport/{id}")
-def update_clearport(id: int, datos: IpPortSchema, db: Session = Depends(get_db), user = Depends(obtener_usuario_actual)):
+def update_clearport(id: int, datos: IpPortSchema, db: Session = Depends(get_db), user = Depends(tiene_permiso("actualizar_ip"))):
     
     return actualizar_port_clear(id_port=id, datos=datos, db=db)
 
 @router.delete("/delete_clearport/{id}")
-def delete_port_endpoint(id: int, db: Session = Depends(get_db), user = Depends(tiene_permiso("eliminar_usuarios"))):
+def delete_port_endpoint(id: int, db: Session = Depends(get_db), user = Depends(tiene_permiso("eliminar_ip"))):
     # Pasamos el id y la sesión db
     resultado = delete_port_clear(record_id=id, db=db)
     

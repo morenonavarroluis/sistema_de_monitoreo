@@ -6,6 +6,7 @@ from controller.registrar_user import registrar_usuario, ver_usuarios, crud_elim
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from acce_token import obtener_usuario_actual
+from permiso import tiene_permiso
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
@@ -23,16 +24,16 @@ async def usuario_login(datos: UserLogin):
     
     return resultado
 
-@router.post("/user")
-async def usuario_registro(datos: UserSchema):
+@router.post("/register_user")
+async def usuario_registro(datos: UserSchema,user = Depends(tiene_permiso("registrar_usuarios"))):
     return registrar_usuario(datos)
 
 @router.get("/view_user")
-async def get_usuarios(user = Depends(obtener_usuario_actual)): 
+async def get_usuarios(user = Depends(tiene_permiso("ver_usuarios"))): 
     return ver_usuarios()
 
 @router.delete("/user/{user_id}")
-async def delete_user_endpoint(user_id: int, db: Session = Depends(get_db), user = Depends(obtener_usuario_actual)):
+async def delete_user_endpoint(user_id: int, db: Session = Depends(get_db), user = Depends(tiene_permiso("eliminar_usuarios"))):
     # Llamamos a la lógica pasándole la sesión
     resultado = crud_eliminar_usuario(db, user_id)
     

@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 import httpx # Recomendado para FastAPI asíncrono
 from acce_token import obtener_usuario_actual
 from fastapi import Depends
-
+from permiso import tiene_permiso
 router = APIRouter(prefix="/bot", tags=["Configuración Bot"])
 
 @router.post("/registrar_boot")
@@ -15,7 +15,7 @@ async def registrar_boot(datos: BootSchema, user = Depends(obtener_usuario_actua
 
 
 @router.post("/send-test-telegram")
-async def send_test_telegram():
+async def send_test_telegram(user = Depends(tiene_permiso("probar_telegram"))):
     # 1. Forzamos la lectura de la DB para tener lo último configurado
     chat_id, token = get_telegram_config()
     
@@ -45,7 +45,7 @@ async def send_test_telegram():
         raise HTTPException(status_code=500, detail=f"Error de red: {str(e)}")
     
 @router.post("/registrar_time")
-def registrar_time(datos: AlertTimeSchema, user = Depends(obtener_usuario_actual)):
+def registrar_time(datos: AlertTimeSchema, user = Depends(tiene_permiso("registrar_time"))):
     try:
         registrar_alert_time(datos.time)
         return {"status": "success", "message": f"Tiempo actualizado a {datos.time}"}
@@ -54,7 +54,7 @@ def registrar_time(datos: AlertTimeSchema, user = Depends(obtener_usuario_actual
 
 
 @router.get("/ver_time")
-def ver_time(user = Depends(obtener_usuario_actual)):
+def ver_time(user = Depends(tiene_permiso("ver_time"))):
     try:
         registros = view_alert()
         

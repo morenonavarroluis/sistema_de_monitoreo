@@ -80,20 +80,7 @@ function Login() {
             </button>
           </form>
           
-          {/* <div className="py-5">
-            <div className="grid grid-cols-2 gap-1">
-              <div className="text-center sm:text-left whitespace-nowrap">
-                <button className="transition duration-200 mx-5 px-5 py-4 cursor-pointer font-normal text-sm rounded-lg text-gray-500 hover:bg-gray-100 focus:outline-none">
-                  <span className="inline-block ml-1">¿Olvidaste tu contraseña?</span>
-                </button>
-              </div>
-              <div className="text-center sm:text-right whitespace-nowrap">
-                <button className="transition duration-200 mx-5 px-5 py-4 cursor-pointer font-normal text-sm rounded-lg text-gray-500 hover:bg-gray-100 focus:outline-none">
-                  <span className="inline-block ml-1">Registrarse</span>
-                </button>
-              </div>
-            </div>
-          </div> */}
+
         </div>
       </div>
     </div>

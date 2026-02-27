@@ -9,9 +9,12 @@ def seed_data():
             "ver_usuarios",
             "registrar_usuarios",
             "eliminar_usuarios",
-            "gestionar_puertos",
-            "configurar_bot",
-            "ver_reportes_ping"
+            "probar_telegram",
+            "registrar_time",
+            "ver_time",
+            "registrar_ip",
+            "ver_ip",
+            "eliminar_ip"
         ]
         
         objetos_permisos = {}
