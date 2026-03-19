@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
         print("No hay horas configuradas en la DB. Scheduler no programado.")
 
     scheduler.start()
-    
+    run_ping_check(historial_real)
     yield  
     
     scheduler.shutdown()

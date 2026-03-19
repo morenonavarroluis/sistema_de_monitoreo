@@ -1,4 +1,4 @@
-#!/home/desarrollo-02/Escritorio/sistema_de_monitoreo/Backend/venv/bin/python
+#!/var/www/html/sistema_de_monitoreo/Backend/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
