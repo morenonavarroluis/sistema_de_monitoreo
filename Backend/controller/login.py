@@ -47,12 +47,13 @@ def login_usuario(usuario: str, password: str):
         # 3. Generar el Token
         # El campo "sub" (subject) suele llevar el identificador único (email o ID)
         access_token = create_access_token(data={"sub": usuario_db.usuario})
-
+        lista_nombres_permisos = [p.nombre_permiso for p in usuario_db.rol.permisos]
         # 4. Respuesta estándar de OAuth2
         return {
             "access_token": access_token, 
             "token_type": "bearer",
-            "user_name": usuario_db.nombre # Opcional, para tu frontend
+            "user_name": usuario_db.nombre,
+            "permissions":lista_nombres_permisos  # Asegúrate de implementar esta función para obtener los permisos del usuario
         }
 
     except Exception as e:

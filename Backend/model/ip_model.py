@@ -53,6 +53,7 @@ class Usuario(Base):
     password = Column(String(255)) # TIP: Usa 255 para hashes de contraseñas
     gmail = Column(String(100), unique=True, index=True)
     id_rol = Column(Integer, ForeignKey("roles.id_rol"), nullable=False)
+    activo = Column(Integer, default=1)  # 1 para activo, 0 para inactivo
     
     rol = relationship("Rol", back_populates="usuarios")
 

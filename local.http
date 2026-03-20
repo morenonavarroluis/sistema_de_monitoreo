@@ -1,6 +1,5 @@
 @baseURL=http://127.0.0.1:8000
-@tokenURL=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJsdWlzbmF2YXJybyIsImV4cCI6MTc3MjIxODg2Nn0.uiawgJZ7pSp6iiQaV6eBIvPWmYmjYmss_iiBMYTOmtY
-
+@tokenURL=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTc3NDAyODk4NH0.OIbaw2B9XBapeErDKPQk_I5wWIbd5fHpbDMrJRmdtcs
 
 ### Login usuario
 POST {{baseURL}}/auth/login
@@ -8,8 +7,8 @@ Content-Type: application/json
 
 {
     
-    "usuario": "luisnavarro",
-    "password": "123456"
+    "usuario": "admin",
+    "password": "admin123"
 }
 
 
@@ -18,17 +17,18 @@ GET  http://127.0.0.1:8000/auth/view_user
 Content-Type: application/json
 Authorization: Bearer {{tokenURL}}
 
-### Registrar usuario
-POST {{baseURL}}/auth/user
+### Registrar un nuevo usuario
+POST {{baseURL}}/auth/register_user
 Content-Type: application/json
-
+Authorization: Bearer {{tokenURL}}
 
 {
-    "nombre": "luis",
-    "usuario": "luisnavarro",
+    "nombre": "Luis Navarro",
+    "usuario": "lnavarro",
     "gmail": "luisnavarro@gmail.com",
-    "password": "123456",
-    "roles": 1
+    "password": "mi_password_seguro",
+    "roles": 1, 
+    "activo": 1
 }
 
 

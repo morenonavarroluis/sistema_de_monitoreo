@@ -2,30 +2,36 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Swal from 'sweetalert2';
+import { useAuth } from '../context/AuthContext';
 function Login() {
   const baseUrl = import.meta.env.VITE_API_URL;
   const [usuario, setUsuario] = useState(''); // Cambiado de email a usuario
+  const { setUser } = useAuth();
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // Nota: Si 'api' ya tiene baseURL, no necesitas `${baseUrl}`
+      
       const response = await api.post(`auth/login`, { 
         usuario: usuario, 
         password: password 
       });
-
+      console.log("Data recibida:", response.data);
       const data = response.data;
 
-      // IMPORTANTE: FastAPI devuelve 'access_token', no 'token' ni 'status'
-      // Si usas la lógica de OAuth2 que armamos antes, el check es así:
+
       if (data.access_token) {
         localStorage.setItem('token', data.access_token); 
-        navigate('/clear_port'); 
+        setUser({
+          username: data.user_name,
+          permisos: data.permissions
+        });
+        navigate('/clear_port', { replace: true });
       } else {
         throw new Error("No se recibió el token");
       }

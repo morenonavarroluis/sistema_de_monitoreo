@@ -16,10 +16,10 @@ function Usuarios() {
   // --- Estados ---
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [users, setUsers] = useState([]); // Aquí cargarías tus datos de la API
+  const [users, setUsers] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const { data } = User();
+  const { data, registrarUsuario } = User();
 
   // --- Columnas de la Tabla ---
   const columns = ["Nombre", "Correo Electrónico", "Rol", "Estado", "Acciones"];
@@ -111,6 +111,7 @@ function Usuarios() {
         title={selectedUser ? "Editar Usuario" : "Registrar Nuevo Usuario"}
       >
         <UserForm 
+          onAction={registrarUsuario}
           initialData={selectedUser} 
           onSuccess={() => setIsModalOpen(false)} 
         />

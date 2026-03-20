@@ -7,6 +7,7 @@ class UserSchema(BaseModel):
     gmail: str
     password: str
     roles: int
+    activo: int = 1
 
 class UserLogin(BaseModel):
     usuario: str

@@ -22,7 +22,8 @@ def registrar_usuario(datos: UserSchema):
             gmail=datos.gmail,
             usuario=datos.usuario,
             id_rol=datos.roles,
-            password=password_hasheada # Guardamos el string del hash
+            activo=datos.activo,
+            password=password_hasheada
         )
         
         db.add(nuevo_usuario)

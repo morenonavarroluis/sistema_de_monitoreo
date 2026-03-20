@@ -32,7 +32,7 @@ export const AppRouter = () => {
       </Route>
 
       {/* Grupo: Monitoreo y Reportes */}
-      <Route element={<ProtectedRoute requiredPermission="ver_reportes_ping" />}>
+      <Route element={<ProtectedRoute requiredPermission="gestionar_reportes" />}>
         <Route path="/reportes" element={<Reportes />} />
         <Route path="/monitoreo" element={<Monitoreo />} />
       </Route>
