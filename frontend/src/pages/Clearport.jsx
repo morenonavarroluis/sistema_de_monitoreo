@@ -9,6 +9,7 @@ import { ProgressBar } from '../components/ProgressBar';
 import { usePorts } from '../hooks/usePorts';
 import { useIpsUser } from '../hooks/ipsUser'; 
 import { usePortScanner } from '../hooks/usePortScanner'; 
+import { useAuth } from '../context/AuthContext';
 
 // Sub-componentes extraídos
 import { RegisterIpForm } from '../components/RegisterIpForm';
@@ -34,38 +35,51 @@ function ClearPort() {
     if (success) setIsModalOpen(false);
   };
 
+ const { hasPermission } = useAuth();
 
-  const columnsPuertos = [
-  { label: 'Dirección IP', key: 'ip_port' }, 
-  { label: 'Nombre del Switch', key: 'nombre' }, 
+const columnsPuertos = [
+  // Columnas básicas (Solo si tiene permiso de ver)
+  hasPermission('ver_ip') && { label: 'Dirección IP', key: 'ip_port' },
+  hasPermission('ver_ip') && { label: 'Nombre del Switch', key: 'nombre' },
+
+  // Columna de Acciones
   {
     label: 'Acciones',
     className: 'text-center',
     render: (item) => (
       <div className="flex gap-2 justify-center">
-        <button 
-          onClick={() => startScanning(item.ip_port)} // Antes handleClean
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors"
-        >
-          Limpiar Puerto
-        </button>
-        <button 
-          onClick={() => handleOpenEdit(item)} // Antes handleEdit
-          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors"
-        >
-          Editar
-        </button>
-        <button 
-          onClick={() => eliminarIp(item.id)} 
-          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors"
-        >
-          eliminar
-        </button>
+        {hasPermission('limpiar_port') && (
+          <button 
+            disabled={loading}
+            onClick={() => startScanning(item.ip_port)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors"
+          >
+            Limpiar Puerto
+          </button>
+        )}
+        
+        {hasPermission('actualizar_ip') && (
+          <button 
+            onClick={() => handleOpenEdit(item)}
+            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors"
+          >
+            Editar
+          </button>
+        )}
+
+        {hasPermission('eliminar_ip') && (
+          <button 
+            onClick={() => eliminarIp(item.id)} 
+            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors"
+          >
+            Eliminar
+          </button>
+        )}
       </div>
     )
   }
-];
-   
+].filter(Boolean);
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
@@ -76,8 +90,10 @@ function ClearPort() {
           <ActionHeader 
             loading={loading} 
             currentDevice={currentDevice} 
-            onScanAll={startScanning} 
+            onScanAll={startScanning}
             onOpenModal={() => setIsModalOpen(true)} 
+            canRegister={hasPermission('registrar_ip')} // Pasa el permiso como prop
+            canCleanAll={hasPermission('limpiar_port')}
           />
 
           {(loading || progress > 0) && (

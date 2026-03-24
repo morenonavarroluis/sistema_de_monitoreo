@@ -1,11 +1,11 @@
 # controller/usuario_controller.py
 from model.ip_model import SessionLocal, Usuario
 from sqlalchemy.orm import Session
-from schemas.schemas import UserSchema  
+from schemas.schemas import PersonaSchema  
 from passlib.context import CryptContext
 import bcrypt # Asegúrate de tenerlo instalado (pip install bcrypt)
 
-def registrar_usuario(datos: UserSchema):
+def registrar_usuario(datos: PersonaSchema):
     db = SessionLocal()
     try:
         # 1. Convertir la contraseña a bytes (necesario para bcrypt)

@@ -2,12 +2,16 @@ from pydantic import BaseModel
 from typing import Optional
 
 class UserSchema(BaseModel):
-    nombre: str
     usuario: str
-    gmail: str
     password: str
-    roles: int
-    activo: int = 1
+
+class PersonaSchema(BaseModel):
+       usuario: str
+       password: str
+       nombre: str
+       gmail: str
+       roles: int
+       activo: int = 1
 
 class UserLogin(BaseModel):
     usuario: str

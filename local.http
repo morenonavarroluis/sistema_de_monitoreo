@@ -1,5 +1,5 @@
 @baseURL=http://127.0.0.1:8000
-@tokenURL=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTc3NDAyODk4NH0.OIbaw2B9XBapeErDKPQk_I5wWIbd5fHpbDMrJRmdtcs
+@tokenURL=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTc3NDM3NDQyMX0.RluGVbSn9gKPuIuj8CpINySE5T_682Hib7KB-5SUXYE
 
 ### Login usuario
 POST {{baseURL}}/auth/login
@@ -32,6 +32,10 @@ Authorization: Bearer {{tokenURL}}
 }
 
 
+### ELIMINIAR USUARIO
+DELETE  http://127.0.0.1:8000/auth/user/2
+Content-Type: application/json
+
 ### Status 
 GET http://127.0.0.1:8000/status
 Content-Type: application/json
@@ -42,8 +46,9 @@ Accept: application/json
 
 
 ### Limpiar Puertos de los Switches por ip
-GET http://127.0.0.1:8000/limpiar_ports/10.20.100.52
-Accept: application/json
+GET http://127.0.0.1:8000/ports/limpiar_ports/10.20.100.41
+Content-Type: application/json
+Authorization: Bearer {{tokenURL}}
 
 ### Limpiar Puertos de los Switches y Guardar en DB
 POST http://127.0.0.1:8000/ports/registrar_ports_db
@@ -57,11 +62,6 @@ Content-Type: application/json
     "description": "Limpieza de mantenimiento mensual"
 }
 
-### Ver Puertos Limpiados en DB
-GET http://127.0.0.1:8000/view_clearports
-Content-Type: application/json
-
-
 ### registrar bot
 POST http://127.0.0.1:8000/bot/registrar_boot
 Content-Type: application/json
@@ -72,20 +72,22 @@ Content-Type: application/json
 }
 
 ###status de reportes
-POST http://127.0.0.1:8000/send-test-telegram
+POST http://127.0.0.1:8000/bot/send-test-telegram
 Content-Type: application/json
+Authorization: Bearer {{tokenURL}}
 
 {}
 
-### ELIMINIAR USUARIO
-DELETE  http://127.0.0.1:8000/auth/user/2
-Content-Type: application/json
 
+
+
+### Ver Puertos Limpiados en DB
+GET http://127.0.0.1:8000/view_clearports
+Content-Type: application/json
 
 ### ELIMINIAR IPport
 DELETE  http://127.0.0.1:8000/ports/delete_clearport/48
 Content-Type: application/json
-
 
 ### Actualizar switch
 PUT  http://127.0.0.1:8000/ports/update_clearport/48

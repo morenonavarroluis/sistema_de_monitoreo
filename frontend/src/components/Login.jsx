@@ -12,41 +12,51 @@ function Login() {
   const navigate = useNavigate();
 
  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
+  
+  try {
+    const response = await api.post(`auth/login`, { 
+      usuario: usuario, 
+      password: password 
+    });
     
-    try {
-      
-      const response = await api.post(`auth/login`, { 
-        usuario: usuario, 
-        password: password 
-      });
-      console.log("Data recibida:", response.data);
-      const data = response.data;
+    console.log("Data recibida:", response.data);
+    const token = response.data.access_token;
 
+    if (token) {
+      // 1. Objeto con la información del usuario
+      const userData = {
+        username: response.data.user_name,
+        permisos: response.data.permissions
+      };
 
-      if (data.access_token) {
-        localStorage.setItem('token', data.access_token); 
-        setUser({
-          username: data.user_name,
-          permisos: data.permissions
-        });
-        navigate('/clear_port', { replace: true });
-      } else {
-        throw new Error("No se recibió el token");
-      }
+      // 2. Guardar en localStorage (El token y el objeto de usuario)
+      localStorage.setItem('token', token); 
+      localStorage.setItem('user_data', JSON.stringify(userData)); // <--- CRUCIAL para la recarga
 
-    } catch (error) {
-      console.error('Error:', error);
-      Swal.fire({
-        icon: "error",
-        title: "Error de acceso",
-        text: error.response?.data?.detail || "Usuario o contraseña incorrectos",
-      });
-    } finally {
-      setIsLoading(false); 
+      // 3. Configurar el header de la instancia de API inmediatamente
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      // 4. Actualizar el estado global del contexto
+      setUser(userData);
+
+      // 5. Navegar a la ruta protegida
+      navigate('/clear_port', { replace: true });
     }
-  };
+
+  } catch (error) {
+    console.error('Error:', error);
+    // Manejo de errores con SweetAlert
+    Swal.fire({
+      icon: "error",
+      title: "Error de acceso",
+      text: error.response?.data?.detail || "Usuario o contraseña incorrectos",
+    });
+  } finally {
+    setIsLoading(false); 
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center sm:py-12">

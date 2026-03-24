@@ -1,118 +1,93 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext'; // <--- IMPORTANTE
 
 export function useIpsUser() {
   const [data, setData] = useState([]); 
   const [loading, setLoading] = useState(false);
+  const { hasPermission, user } = useAuth(); // <--- Obtenemos la función de permisos
 
-  // 1. Definimos la función para traer datos
-  const fetchData = async () => {
+  // 1. Traer datos (Solo si tiene permiso 'ver_ip')
+  const fetchData = useCallback(async () => {
+    if (!hasPermission('ver_ip')) return; // Bloqueo preventivo en el front
+    
     try {
       const response = await api.get('ports/view_clearports');
       setData(response.data);
     } catch (error) {
-      console.error('Error en GET:', error);
+      console.error('Error en GET:', error.response?.data?.detail || error.message);
+    }
+  }, [hasPermission]);
+
+  // 2. Registrar (Permiso: 'registrar_ip')
+  const registrarNuevaIp = async (datosFormulario) => {
+    if (!hasPermission('registrar_ip')) {
+      alert("No tienes permiso para registrar dispositivos");
+      return false;
+    }
+    
+    setLoading(true);
+    try {
+      const response = await api.post('ports/registrar_ports_db', datosFormulario);
+      alert(response.data.message || "¡Registrado!");
+      await fetchData(); 
+      return true;
+    } catch (error) {
+      alert(`Error: ${error.response?.data?.detail || "Error al registrar"}`);
+      return false;
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 2. Definimos la función para registrar
-  const registrarNuevaIp = async (datosFormulario) => {
-  setLoading(true);
-  try {
-    
-
-    const response = await api.post('ports/registrar_ports_db', { 
-      ...datosFormulario,
-      
-    });
-    
-    // 2. Usamos un mensaje más descriptivo si el backend lo envía
-    alert(response.data.message || "¡Dispositivo registrado con éxito!");
-    
-    // 3. Refrescar la tabla
-    if (fetchData) await fetchData(); 
-    
-    return true;
-  } catch (error) {
-    // 4. LOG DETALLADO: Esto te dirá exactamente qué campo falló en la base de datos
-    const serverError = error.response?.data?.detail;
-    console.error("Error del servidor:", serverError || error.message);
-    
-    // Si el error es un array (común en FastAPI), lo convertimos a texto
-    const errorMsg = Array.isArray(serverError) 
-      ? serverError.map(e => `${e.loc[1]}: ${e.msg}`).join(", ")
-      : "Error interno del servidor (500)";
-
-    alert(`Error al registrar: ${errorMsg}`);
-    return false;
-  } finally {
-    setLoading(false);
-  }
-};
-
-const EditarSwitch = async (datosFormulario) => {
-  setLoading(true);
-  try {
-    // 1. Extraemos el ID del objeto. 
-    // Asegúrate de que el backend te envíe el 'id' cuando haces el GET inicial.
-    const { id } = datosFormulario; 
-
-    if (!id) {
-      alert("Error: No se encontró el ID del registro para actualizar");
+  // 3. Editar (Permiso: 'actualizar_ip')
+  const EditarSwitch = async (datosFormulario) => {
+    if (!hasPermission('actualizar_ip')) {
+      alert("No tienes permiso para editar");
       return false;
     }
 
-    // 2. Construimos la URL dinámica: ports/update_clearport/48
-    const response = await api.put(`ports/update_clearport/${id}`, { 
-      ip_port: datosFormulario.ip_port,
-      nombre: datosFormulario.nombre,
-      user_ip: datosFormulario.user_ip,
-      pass_ip: datosFormulario.pass_ip,
-      description: datosFormulario.description
-    });
-    
-    alert(response.data.message || "¡Dispositivo actualizado!");
-    if (fetchData) await fetchData(); 
-    return true;
+    setLoading(true);
+    try {
+      const { id } = datosFormulario; 
+      const response = await api.put(`ports/update_clearport/${id}`, datosFormulario);
+      alert(response.data.message || "¡Actualizado!");
+      await fetchData(); 
+      return true;
+    } catch (error) {
+      alert("Error al actualizar");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  } catch (error) {
-    console.error("Error al actualizar:", error.response?.data || error.message);
-    alert("Error al actualizar el registro en el servidor");
-    return false;
-  } finally {
-    setLoading(false);
-  }
-};
+  // 4. Eliminar (Permiso: 'eliminar_ip')
+  const eliminarIp = async (id) => {
+    if (!hasPermission('eliminar_ip')) {
+      alert("No tienes permiso para eliminar");
+      return false;
+    }
 
-const eliminarIp = async (id) => {
-  // Una confirmación simple antes de borrar
-  if (!window.confirm("¿Estás seguro de que deseas eliminar este dispositivo?")) return;
+    if (!window.confirm("¿Eliminar dispositivo?")) return;
 
-  setLoading(true);
-  try {
-    // Usamos el método DELETE y el ID en la URL
-    const response = await api.delete(`ports/delete_clearport/${id}`);
-    
-    alert(response.data.message || "Eliminado correctamente");
-    
-    // Refrescamos la lista para que desaparezca de la tabla
-    if (fetchData) await fetchData();
-    return true;
-  } catch (error) {
-    console.error("Error al eliminar:", error.response?.data || error.message);
-    alert("No se pudo eliminar el registro");
-    return false;
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      const response = await api.delete(`ports/delete_clearport/${id}`);
+      alert(response.data.message || "Eliminado");
+      await fetchData();
+      return true;
+    } catch (error) {
+      alert("No se pudo eliminar");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
 
-
-  // 3. Cargamos los datos al iniciar
   useEffect(() => { 
-    fetchData(); 
-  }, []);
+    if (user) fetchData(); // Solo carga si hay un usuario logueado
+  }, [fetchData, user]);
 
-  // 4. EL RETURN: Aquí es donde fallaba si 'data' no estaba definida
-  return { data, registrarNuevaIp,EditarSwitch,eliminarIp, loading };
+  return { data, registrarNuevaIp, EditarSwitch, eliminarIp, loading, fetchData };
 }

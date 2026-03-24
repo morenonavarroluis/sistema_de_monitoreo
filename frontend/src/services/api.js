@@ -9,8 +9,7 @@ const api = axios.create({
 });
 
 // Interceptor de petición: se ejecuta antes de CADA llamada a la API
-api.interceptors.request.use(
-  (config) => {
+api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
       // Seteamos el token dinámicamente

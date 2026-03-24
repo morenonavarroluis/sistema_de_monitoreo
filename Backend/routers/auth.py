@@ -1,6 +1,6 @@
 from fastapi import APIRouter,status
 from dependencies import get_db
-from schemas.schemas import UserLogin, UserSchema
+from schemas.schemas import UserLogin, PersonaSchema
 from controller.login import login_usuario
 from controller.registrar_user import registrar_usuario, ver_usuarios, crud_eliminar_usuario
 from fastapi import Depends, HTTPException
@@ -25,7 +25,7 @@ async def usuario_login(datos: UserLogin):
     return resultado
 
 @router.post("/register_user")
-async def usuario_registro(datos: UserSchema,user = Depends(tiene_permiso("registrar_usuarios"))):
+async def usuario_registro(datos: PersonaSchema,user = Depends(tiene_permiso("registrar_usuarios"))):
     return registrar_usuario(datos)
 
 @router.get("/view_user")
