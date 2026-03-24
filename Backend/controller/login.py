@@ -7,7 +7,7 @@ import os
 import bcrypt
 SECRET_KEY = os.getenv("SECRET_KEY", "tu_llave_super_secreta_aqui")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 160
 
 def create_access_token(data: dict):
     to_encode = data.copy()

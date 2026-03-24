@@ -14,7 +14,8 @@ def seed_data():
             "ver_time",
             "registrar_ip",
             "ver_ip",
-            "eliminar_ip"
+            "eliminar_ip",
+            
         ]
         
         objetos_permisos = {}

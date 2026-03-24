@@ -14,7 +14,6 @@ router = APIRouter(prefix="/ports", tags=["Gestión de Puertos"])
 @router.get("/limpiar_ports")
 async def port_clear_stream(db: Session = Depends(get_db), user = Depends(tiene_permiso("limpiar_ports"))):
     def generate_progress():
-        # Usamos la 'db' que viene por parámetro, no creamos SessionLocal() aquí
         try:
             dispositivos = db.query(Clearport).all()
             if not dispositivos:
@@ -60,7 +59,10 @@ async def port_clear_individual(ip: str, db: Session = Depends(get_db), user = D
             yield f"data: {json.dumps({'progress': 20, 'nombre': equipo.nombre, 'status': 'Iniciando SSH...'})}\n\n"
             
             exito = test_ssh_connection(equipo.ip_port, equipo.user_ip, equipo.pass_ip)
-            
+            if not exito:
+                # ENVIAMOS EL ERROR ESPECÍFICO
+                yield f"data: {json.dumps({'error': 'Fallo de autenticación SSH', 'ip': ip})}\n\n"
+                return
             status = "OK" if exito else "Error"
             payload = {
                 "progress": 100,
