@@ -1,21 +1,23 @@
 import { useNavigate } from 'react-router-dom';
 import { Activity,History,Trash2,Users,FileText, LogOut, X } from 'lucide-react';
-
+import { useAuth } from '../context/AuthContext';
 // Recibe isOpen y onClose desde el padre
 function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
-
+   const { hasPermission } = useAuth();
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/');
   };
+   
+  const allMenuItems = [
+  { name: 'Limpiar Puertos', icon: <Trash2 size={20} />, path: '/clear_port' },
+  { name: 'Gestión de Usuarios', icon: <Users size={20} />, path: '/Usuarios', permission: 'limpiar_port' },
+  { name: 'Gestión de Reportes', icon: <FileText size={20} />, path: '/Reportes', permission: 'gestionar_reportes' },
+  { name: 'Historial', icon: <History size={20} />, path: '/History' },
+];
 
-  const menuItems = [
-    { name: 'Limpiar Puertos', icon: <Trash2 size={20} />, path: '/clear_port' },
-    { name: 'Gestión de Reportes', icon: <FileText size={20} />, path: '/Reportes' },
-    { name: 'Gestión de Usuarios', icon: <Users size={20} />, path: '/Usuarios' },
-    { name: 'Historial', icon: <History size={20} />, path: '/History' },
-  ];
+const menuItems = allMenuItems.filter(item => !item.permission || hasPermission(item.permission));
 
   return (
     <>
